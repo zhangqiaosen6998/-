@@ -175,7 +175,52 @@
         .progress-bg { width: 100%; height: 6px; background: var(--bg-color); border-radius: 3px; margin: 20px 0; overflow: hidden; }
         .progress-bar { height: 100%; background: var(--accent-color); width: 0%; transition: width 1s linear; }
 
-        /* --- 模块 3: 心情日记 --- */
+        /* --- 模块 3: 白噪音 --- */
+        .noise-grid { display: flex; flex-wrap: wrap; gap: 15px; justify-content: center; }
+        .noise-item {
+            width: 80px; height: 80px; border-radius: 20px; background: var(--bg-color);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            cursor: pointer; transition: var(--transition-soft); color: var(--text-color);
+        }
+        .noise-item.playing { background: var(--primary-color); color: #fff; transform: translateY(-5px); box-shadow: 0 5px 15px rgba(184, 198, 219, 0.5); }
+        .noise-item i { font-size: 1.5rem; font-style: normal; margin-bottom: 5px; }
+        .volume-control { margin-top: 20px; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        input[type=range] { accent-color: var(--primary-color); }
+
+        /* --- 模块 4: 自我关怀清单 --- */
+        .care-list { list-style: none; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; }
+        .care-item {
+            display: flex; align-items: center; gap: 10px; cursor: pointer;
+            padding: 10px 15px; background: var(--bg-color); border-radius: 12px; transition: var(--transition-soft);
+        }
+        .care-item:hover { transform: translateX(5px); }
+        .care-item.done { opacity: 0.6; text-decoration: line-through; background: transparent; border: 1px dashed var(--primary-color); }
+        .care-checkbox { width: 18px; height: 18px; border: 2px solid var(--primary-color); border-radius: 50%; display: inline-block; transition: 0.3s; }
+        .care-item.done .care-checkbox { background: var(--primary-color); border-color: var(--primary-color); }
+        .add-care { display: flex; gap: 10px; margin-top: 20px; }
+        .add-care input { flex: 1; padding: 10px; border-radius: 20px; border: 1px solid var(--primary-color); background: transparent; color: var(--text-color); }
+
+        /* --- 模块 5: 喜欢的歌曲 --- */
+        .music-list { display: flex; flex-direction: column; gap: 15px; }
+        .music-item {
+            display: flex; align-items: center; gap: 15px; padding: 15px 20px;
+            background: var(--bg-color); border-radius: 15px; cursor: pointer;
+            transition: var(--transition-soft);
+        }
+        .music-item:hover { transform: translateX(5px); box-shadow: var(--shadow); }
+        .music-item.playing { background: var(--primary-color); color: #fff; }
+        .music-item.playing .music-artist { color: rgba(255,255,255,0.8); }
+        .music-icon {
+            width: 40px; height: 40px; border-radius: 50%; background: var(--card-bg);
+            display: flex; justify-content: center; align-items: center;
+            color: var(--primary-color); font-size: 1.2rem; transition: var(--transition-soft);
+        }
+        .music-item.playing .music-icon { color: var(--accent-color); transform: scale(1.1); }
+        .music-info { display: flex; flex-direction: column; }
+        .music-name { font-size: 1rem; font-weight: 500; }
+        .music-artist { font-size: 0.8rem; color: #888; transition: var(--transition-soft); }
+
+        /* --- 模块 6: 心情日记 --- */
         .diary-input-area { display: flex; flex-direction: column; gap: 15px; margin-bottom: 20px; }
         .diary-textarea {
             width: 100%; padding: 15px; border: 1px solid var(--primary-color);
@@ -193,32 +238,7 @@
         .diary-del { position: absolute; top: 15px; right: 15px; cursor: pointer; color: #ff7875; opacity: 0.6; }
         .diary-del:hover { opacity: 1; }
 
-        /* --- 模块 4: 白噪音 --- */
-        .noise-grid { display: flex; flex-wrap: wrap; gap: 15px; justify-content: center; }
-        .noise-item {
-            width: 80px; height: 80px; border-radius: 20px; background: var(--bg-color);
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            cursor: pointer; transition: var(--transition-soft); color: var(--text-color);
-        }
-        .noise-item.playing { background: var(--primary-color); color: #fff; transform: translateY(-5px); box-shadow: 0 5px 15px rgba(184, 198, 219, 0.5); }
-        .noise-item i { font-size: 1.5rem; font-style: normal; margin-bottom: 5px; }
-        .volume-control { margin-top: 20px; display: flex; align-items: center; justify-content: center; gap: 10px; }
-        input[type=range] { accent-color: var(--primary-color); }
-
-        /* --- 模块 5: 自我关怀清单 --- */
-        .care-list { list-style: none; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; }
-        .care-item {
-            display: flex; align-items: center; gap: 10px; cursor: pointer;
-            padding: 10px 15px; background: var(--bg-color); border-radius: 12px; transition: var(--transition-soft);
-        }
-        .care-item:hover { transform: translateX(5px); }
-        .care-item.done { opacity: 0.6; text-decoration: line-through; background: transparent; border: 1px dashed var(--primary-color); }
-        .care-checkbox { width: 18px; height: 18px; border: 2px solid var(--primary-color); border-radius: 50%; display: inline-block; transition: 0.3s; }
-        .care-item.done .care-checkbox { background: var(--primary-color); border-color: var(--primary-color); }
-        .add-care { display: flex; gap: 10px; margin-top: 20px; }
-        .add-care input { flex: 1; padding: 10px; border-radius: 20px; border: 1px solid var(--primary-color); background: transparent; color: var(--text-color); }
-
-        /* --- 模块 6: 时光相册 --- */
+        /* --- 模块 7: 时光相册 --- */
         .file-input-wrapper { text-align: center; margin-bottom: 25px; }
         #photo-input { display: none; }
         #gallery-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 20px; }
@@ -331,11 +351,11 @@
             <input type="range" id="noise-volume" min="0" max="1" step="0.1" value="0.5" onchange="updateVolume(this.value)">
             <span>🔊</span>
         </div>
-        <audio id="audio-rain" loop src=""></audio>
-        <audio id="audio-forest" loop src=""></audio>
-        <audio id="audio-stream" loop src=""></audio>
-        <audio id="audio-fire" loop src=""></audio>
-        <audio id="audio-piano" loop src=""></audio>
+        <audio id="audio-rain" loop src="rain.mp3"></audio>
+        <audio id="audio-forest" loop src="forest.mp3"></audio>
+        <audio id="audio-stream" loop src="stream.mp3"></audio>
+        <audio id="audio-fire" loop src="fire.mp3"></audio>
+        <audio id="audio-piano" loop src="piano.mp3"></audio>
     </section>
 
     <section class="fade-in-up" id="self-care">
@@ -344,6 +364,41 @@
         <div class="add-care">
             <input type="text" id="new-care-input" placeholder="添加一件爱自己的小事...">
             <button class="btn-solid" onclick="addCareItem()">添加</button>
+        </div>
+    </section>
+
+    <section class="fade-in-up" id="favorite-music">
+        <h2 class="section-title">音乐疗愈</h2>
+        <p style="text-align: center; font-size: 0.8rem; margin-bottom: 15px; color:#aaa;">* 戴上耳机，享受专属旋律</p>
+        <div class="music-list">
+            
+            <div class="music-item" onclick="toggleMusic('song1')">
+                <div class="music-icon" id="icon-song1">▶</div>
+                <div class="music-info">
+                    <div class="music-name">你的专属歌曲 1</div>
+                    <div class="music-artist">点击播放</div>
+                </div>
+                <audio id="audio-song1" src="song1.mp3" onended="resetMusic('song1')"></audio>
+            </div>
+
+            <div class="music-item" onclick="toggleMusic('song2')">
+                <div class="music-icon" id="icon-song2">▶</div>
+                <div class="music-info">
+                    <div class="music-name">你的专属歌曲 2</div>
+                    <div class="music-artist">点击播放</div>
+                </div>
+                <audio id="audio-song2" src="song2.mp3" onended="resetMusic('song2')"></audio>
+            </div>
+
+            <div class="music-item" onclick="toggleMusic('song3')">
+                <div class="music-icon" id="icon-song3">▶</div>
+                <div class="music-info">
+                    <div class="music-name">你的专属歌曲 3</div>
+                    <div class="music-artist">点击播放</div>
+                </div>
+                <audio id="audio-song3" src="song3.mp3" onended="resetMusic('song3')"></audio>
+            </div>
+
         </div>
     </section>
 
@@ -373,7 +428,7 @@
 </div>
 
 <script>
-    /* --- 核心工具：弹窗与 Observer --- */
+    /* --- 核心工具 --- */
     function showWarmToast(msg) {
         const container = document.getElementById('toast-container');
         const toast = document.createElement('div');
@@ -409,7 +464,6 @@
     }, { threshold: 0.1 });
     document.querySelectorAll('.fade-in-up').forEach(el => observer.observe(el));
 
-    /* --- 主题切换 --- */
     function toggleTheme() {
         const html = document.documentElement;
         const current = html.getAttribute('data-theme');
@@ -419,7 +473,6 @@
         showWarmToast(next === 'dark' ? '已为你调暗灯光 🌙' : '阳光照进来了 ☀️');
     }
 
-    /* --- 初始化 --- */
     document.addEventListener('DOMContentLoaded', () => {
         const savedTheme = localStorage.getItem('harbor_theme') || 'light';
         document.documentElement.setAttribute('data-theme', savedTheme);
@@ -448,13 +501,13 @@
         const moods = JSON.parse(localStorage.getItem('harbor_moods') || '{}');
         const container = document.getElementById('mood-trend');
         container.innerHTML = '';
-        const dates = Object.keys(moods).slice(-7); // 近7天
+        const dates = Object.keys(moods).slice(-7); 
         if(dates.length === 0) {
             container.innerHTML = '<span style="color:#aaa;font-size:0.8rem;">点亮上方图标开启记录</span>';
             return;
         }
         dates.forEach(date => {
-            const h = moods[date] * 20; // 1-5分对应20-100px
+            const h = moods[date] * 20; 
             const bar = document.createElement('div');
             bar.className = 'trend-item';
             bar.style.height = '0px';
@@ -526,7 +579,7 @@
             medTimeLeft--;
             document.getElementById('med-progress').style.width = `${((medTotal - medTimeLeft) / medTotal) * 100}%`;
             
-            if (medTimeLeft % 15 === 0) { // 每15秒换句引导语
+            if (medTimeLeft % 15 === 0) { 
                 const textEl = document.getElementById('med-text');
                 textEl.style.opacity = 0;
                 setTimeout(() => { textEl.innerText = medTexts[textIdx % medTexts.length]; textEl.style.opacity = 1; textIdx++; }, 1000);
@@ -545,7 +598,6 @@
     let activeNoise = null;
     function toggleNoise(type, el) {
         const audio = document.getElementById(`audio-${type}`);
-        // 演示逻辑：由于没有真实音频链接，仅做UI反馈
         if (activeNoise && activeNoise !== type) {
             document.getElementById(`audio-${activeNoise}`).pause();
             document.querySelector('.noise-item.playing')?.classList.remove('playing');
@@ -555,8 +607,7 @@
         } else {
             el.classList.add('playing'); 
             activeNoise = type;
-            // audio.play().catch(e => console.log('无有效音频源'));
-            showWarmToast(`已开启${el.innerText}声音 (需配置真实音频文件)`);
+            audio.play().catch(e => showWarmToast('暂无音频文件，请先上传 ' + type + '.mp3'));
         }
     }
     function updateVolume(val) { document.querySelectorAll('audio').forEach(a => a.volume = val); }
@@ -586,7 +637,48 @@
         input.value = ''; renderCareList(); showWarmToast('已加入清单 📝');
     }
 
-    /* --- 5. 心情日记 --- */
+    /* --- 5. 喜欢的歌曲 --- */
+    let currentMusic = null;
+    function toggleMusic(id) {
+        const audio = document.getElementById(`audio-${id}`);
+        const item = audio.closest('.music-item');
+        const icon = document.getElementById(`icon-${id}`);
+
+        // 暂停当前播放
+        if (currentMusic === id) {
+            audio.pause();
+            item.classList.remove('playing');
+            icon.innerText = '▶';
+            currentMusic = null;
+            return;
+        }
+
+        // 互斥处理：暂停其他歌曲
+        if (currentMusic) {
+            const prevAudio = document.getElementById(`audio-${currentMusic}`);
+            const prevItem = prevAudio.closest('.music-item');
+            const prevIcon = document.getElementById(`icon-${currentMusic}`);
+            prevAudio.pause();
+            prevItem.classList.remove('playing');
+            prevIcon.innerText = '▶';
+        }
+
+        // 播放新歌
+        audio.play().catch(e => showWarmToast('未找到音频文件，请确认已上传 ' + id + '.mp3'));
+        item.classList.add('playing');
+        icon.innerText = '⏸';
+        currentMusic = id;
+    }
+
+    function resetMusic(id) {
+        const item = document.getElementById(`audio-${id}`).closest('.music-item');
+        const icon = document.getElementById(`icon-${id}`);
+        item.classList.remove('playing');
+        icon.innerText = '▶';
+        if (currentMusic === id) currentMusic = null;
+    }
+
+    /* --- 6. 心情日记 --- */
     function saveDiary() {
         const content = document.getElementById('diary-content').value.trim();
         if(!content) { showWarmToast('写点什么再封存吧~'); return; }
@@ -616,7 +708,7 @@
         });
     }
 
-    /* --- 6. 时光相册 --- */
+    /* --- 7. 时光相册 --- */
     document.getElementById('photo-input').addEventListener('change', function(e) {
         const file = e.target.files[0];
         if (!file) return;
