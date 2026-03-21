@@ -1,620 +1,658 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh-CN" data-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>心灵港湾 - 你的温暖角落</title>
     <style>
-        /* 全局样式 - 莫兰迪疗愈色系 */
+        /* --- 全局与主题变量 --- */
         :root {
-            --bg-color: #fdfaf5; /* 奶油米 */
-            --text-color: #5d5c5c; /* 深灰蓝 */
-            --primary-color: #b8c6db; /* 柔蓝 */
-            --accent-color: #f5d1c3; /* 柔粉 */
+            --bg-color: #fdfaf5; 
+            --text-color: #5d5c5c; 
+            --primary-color: #b8c6db; 
+            --accent-color: #f5d1c3; 
             --card-bg: #ffffff;
             --shadow: 0 4px 15px rgba(0,0,0,0.05);
             --border-radius: 20px;
+            --toast-bg: rgba(255, 255, 255, 0.9);
+            --transition-soft: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Noto Sans SC', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        [data-theme="dark"] {
+            --bg-color: #2d3035; 
+            --text-color: #e0dbd1; 
+            --primary-color: #8a9cb8; 
+            --accent-color: #d4b8a8; 
+            --card-bg: #3a3d42;
+            --shadow: 0 4px 15px rgba(0,0,0,0.2);
+            --toast-bg: rgba(58, 61, 66, 0.9);
         }
 
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
         body {
             background-color: var(--bg-color);
             color: var(--text-color);
-            line-height: 1.8;
+            font-family: 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            line-height: 1.9;
             padding-bottom: 50px;
+            transition: background-color 0.5s ease, color 0.5s ease;
+            overflow-x: hidden;
         }
 
-        /* 布局 */
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
+        /* --- 动画与交互基础 --- */
+        .fade-in-up {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
         }
-
-        /* 头部 */
-        header {
-            text-align: center;
-            padding: 60px 0 40px;
-        }
-
-        header h1 {
-            font-size: 2.5rem;
-            color: var(--text-color);
-            font-weight: 300;
-            letter-spacing: 2px;
-        }
-
-        header p {
-            color: #888;
-            margin-top: 10px;
-        }
-
-        /* 模块通用样式 */
-        section {
-            margin-bottom: 50px;
-            background: var(--card-bg);
-            padding: 30px;
-            border-radius: var(--border-radius);
-            box-shadow: var(--shadow);
-        }
-
-        h2.section-title {
-            font-size: 1.2rem;
-            color: #888;
-            margin-bottom: 25px;
-            font-weight: 400;
-            text-align: center;
-            position: relative;
-        }
-        
-        h2.section-title::after {
-            content: '';
-            display: block;
-            width: 40px;
-            height: 2px;
-            background: var(--accent-color);
-            margin: 8px auto 0;
-        }
-
-        /* --- 1. 心语卡片 --- */
-        #quote-container {
-            text-align: center;
-            min-height: 180px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-        }
-
-        #quote-text {
-            font-size: 1.3rem;
-            color: #4a4a4a;
-            margin-bottom: 20px;
-            font-weight: 300;
-            transition: opacity 0.3s;
-        }
-
-        #quote-author {
-            font-size: 0.9rem;
-            color: #999;
-            transition: opacity 0.3s;
-        }
+        .fade-in-up.visible { opacity: 1; transform: translateY(0); }
 
         .btn-general {
-            background: none;
+            background: transparent;
             border: 1px solid var(--primary-color);
             color: var(--primary-color);
             padding: 8px 25px;
             border-radius: 20px;
             cursor: pointer;
-            margin-top: 20px;
-            transition: all 0.3s;
+            transition: var(--transition-soft);
             font-size: 0.9rem;
+            outline: none;
         }
-
         .btn-general:hover {
             background: var(--primary-color);
-            color: white;
+            color: #fff;
+            box-shadow: 0 4px 10px rgba(184, 198, 219, 0.4);
         }
+        .btn-general:active { transform: scale(0.98); }
 
-        /* --- 2. 呼吸冥想 --- */
-        #breathing-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            text-align: center;
-        }
-
-        .circle-outer {
-            width: 160px;
-            height: 160px;
-            background: #e6eef8;
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin-bottom: 20px;
-            position: relative;
-            box-shadow: 0 0 10px rgba(0,0,0,0.02);
-        }
-
-        .circle-inner {
-            width: 40px; /* 基础大小 */
-            height: 40px;
-            background: var(--primary-color);
-            border-radius: 50%;
-            opacity: 0.8;
-            /* 动画定义在 JS 中通过类名切换 */
-            transition: transform 0.2s ease-out; /* 默认过渡 */
-        }
-        
-        /* 呼吸动画状态类 */
-        .circle-inner.inhale {
-            transition: transform 4s linear;
-            transform: scale(3.5); /* 放大吸气 */
-            background: var(--primary-color);
-        }
-        
-        .circle-inner.hold {
-            transition: none; /* 屏息时不移动 */
-            transform: scale(3.5); /* 保持放大 */
-            background: var(--accent-color); /* 变柔粉 */
-        }
-
-        .circle-inner.exhale {
-            transition: transform 8s linear;
-            transform: scale(1); /* 缩小呼气 */
-            background: #bbb; /* 变灰 */
-        }
-
-        #breathe-text {
-            font-size: 1.1rem;
-            color: var(--primary-color);
-            font-weight: bold;
-            height: 1.2rem;
-            display: flex;
-            align-items: center;
-        }
-
-        #breathe-btn {
-            background-color: var(--accent-color);
+        .btn-solid {
+            background: var(--accent-color);
             border: none;
-            color: white;
-        }
-        #breathe-btn:hover {
-            opacity: 0.9;
-            background-color: var(--accent-color);
-        }
-
-        /* --- 3. 时光相册 --- */
-        #gallery-controls {
-            text-align: center;
-            margin-bottom: 25px;
-        }
-
-        .file-input-wrapper {
-            position: relative;
-            overflow: hidden;
-            display: inline-block;
-        }
-
-        .btn-upload {
-            border: none;
-            background-color: var(--accent-color);
-            color: white;
+            color: #fff;
             padding: 10px 30px;
             border-radius: 25px;
             cursor: pointer;
-            font-size: 1rem;
+            transition: var(--transition-soft);
             box-shadow: var(--shadow);
-            transition: opacity 0.3s;
         }
-        .btn-upload:hover {
-            opacity: 0.9;
+        .btn-solid:hover { opacity: 0.9; box-shadow: 0 6px 15px rgba(245, 209, 195, 0.5); }
+        .btn-solid:active { transform: scale(0.98); }
+
+        /* --- 布局结构 --- */
+        .container { max-width: 800px; margin: 0 auto; padding: 20px; opacity: 0; animation: pageLoad 0.8s ease forwards; }
+        @keyframes pageLoad { to { opacity: 1; } }
+
+        header { text-align: center; padding: 40px 0; position: relative; }
+        header h1 { font-size: 2.2rem; font-weight: 300; letter-spacing: 2px; }
+        
+        .theme-toggle {
+            position: absolute; right: 10px; top: 40px;
+            background: none; border: none; font-size: 1.5rem; cursor: pointer;
+            color: var(--text-color); transition: var(--transition-soft);
+        }
+        .theme-toggle:hover { transform: rotate(15deg) scale(1.1); }
+
+        section {
+            margin-bottom: 40px; background: var(--card-bg); padding: 30px;
+            border-radius: var(--border-radius); box-shadow: var(--shadow);
+            transition: var(--transition-soft);
         }
 
-        #photo-input {
-            position: absolute;
-            left: 0;
-            top: 0;
-            opacity: 0;
-            cursor: pointer;
-            width: 100%;
-            height: 100%;
+        h2.section-title {
+            font-size: 1.2rem; color: var(--text-color); opacity: 0.8;
+            margin-bottom: 25px; font-weight: 400; text-align: center;
         }
-
-        #gallery-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-            gap: 25px;
-            margin-top: 20px;
+        h2.section-title::after {
+            content: ''; display: block; width: 40px; height: 2px;
+            background: var(--accent-color); margin: 8px auto 0;
+            transition: width 0.3s;
         }
+        section:hover h2.section-title::after { width: 60px; }
 
+        /* --- 自定义温暖弹窗 (Toast & Confirm) --- */
+        #toast-container {
+            position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
+            z-index: 1000; display: flex; flex-direction: column; gap: 10px;
+        }
+        .toast {
+            background: var(--toast-bg); color: var(--text-color);
+            padding: 12px 25px; border-radius: 30px; font-size: 0.9rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1); backdrop-filter: blur(5px);
+            animation: toastIn 0.4s ease, toastOut 0.4s ease 2.5s forwards;
+        }
+        @keyframes toastIn { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes toastOut { to { opacity: 0; transform: translateY(-20px); } }
+
+        #confirm-modal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.3); backdrop-filter: blur(3px);
+            display: flex; justify-content: center; align-items: center;
+            z-index: 1001; opacity: 0; pointer-events: none; transition: opacity 0.3s;
+        }
+        #confirm-modal.active { opacity: 1; pointer-events: auto; }
+        .confirm-box {
+            background: var(--card-bg); padding: 30px; border-radius: 20px;
+            text-align: center; max-width: 300px; transform: scale(0.9); transition: transform 0.3s;
+        }
+        #confirm-modal.active .confirm-box { transform: scale(1); }
+        .confirm-btns { display: flex; gap: 15px; justify-content: center; margin-top: 20px; }
+
+        /* --- 模块 0: 心情温度计 --- */
+        #mood-tracker { text-align: center; }
+        .thermometer { display: flex; justify-content: center; gap: 15px; margin-bottom: 20px; }
+        .mood-scale {
+            width: 40px; height: 40px; border-radius: 50%; display: flex;
+            align-items: center; justify-content: center; font-size: 1.2rem;
+            background: var(--bg-color); cursor: pointer; transition: var(--transition-soft);
+        }
+        .mood-scale:hover, .mood-scale.active { background: var(--accent-color); transform: scale(1.1); color: #fff; }
+        .trend-bar { height: 100px; display: flex; align-items: flex-end; justify-content: center; gap: 8px; margin-top: 20px; }
+        .trend-item { width: 20px; background: var(--primary-color); border-radius: 10px 10px 0 0; opacity: 0.6; transition: height 0.8s ease; }
+
+        /* --- 模块 1: 每日心语 --- */
+        #quote-container { text-align: center; min-height: 150px; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+        .quote-anim { transition: opacity 0.5s ease, transform 0.5s ease; }
+        .quote-hidden { opacity: 0; transform: scale(0.95) translateY(10px); }
+
+        /* --- 模块 2: 呼吸与冥想 --- */
+        .meditation-wrapper { display: flex; flex-wrap: wrap; gap: 30px; justify-content: center; }
+        .meditation-box { flex: 1; min-width: 250px; text-align: center; }
+        
+        .circle-outer {
+            width: 140px; height: 140px; background: var(--bg-color); border-radius: 50%;
+            display: flex; justify-content: center; align-items: center; margin: 0 auto 20px;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.02);
+        }
+        .circle-inner {
+            width: 40px; height: 40px; background: var(--primary-color); border-radius: 50%;
+            transition: transform 0.5s ease, background-color 0.5s ease;
+        }
+        .circle-inner.inhale { transform: scale(3.2); background: var(--primary-color); transition: transform 4s linear, background-color 4s; }
+        .circle-inner.hold { transform: scale(3.2); background: var(--accent-color); transition: background-color 1s; }
+        .circle-inner.exhale { transform: scale(1); background: var(--text-color); opacity: 0.5; transition: transform 8s linear, background-color 8s; }
+
+        .progress-bg { width: 100%; height: 6px; background: var(--bg-color); border-radius: 3px; margin: 20px 0; overflow: hidden; }
+        .progress-bar { height: 100%; background: var(--accent-color); width: 0%; transition: width 1s linear; }
+
+        /* --- 模块 3: 心情日记 --- */
+        .diary-input-area { display: flex; flex-direction: column; gap: 15px; margin-bottom: 20px; }
+        .diary-textarea {
+            width: 100%; padding: 15px; border: 1px solid var(--primary-color);
+            border-radius: 15px; background: transparent; color: var(--text-color);
+            resize: none; outline: none; transition: var(--transition-soft);
+        }
+        .diary-textarea:focus { box-shadow: 0 0 10px rgba(184, 198, 219, 0.3); }
+        .diary-list { display: flex; flex-direction: column; gap: 15px; }
+        .diary-item {
+            background: var(--bg-color); padding: 15px; border-radius: 15px;
+            position: relative; animation: slideInUp 0.4s ease;
+        }
+        @keyframes slideInUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .diary-time { font-size: 0.8rem; color: var(--primary-color); margin-bottom: 5px; }
+        .diary-del { position: absolute; top: 15px; right: 15px; cursor: pointer; color: #ff7875; opacity: 0.6; }
+        .diary-del:hover { opacity: 1; }
+
+        /* --- 模块 4: 白噪音 --- */
+        .noise-grid { display: flex; flex-wrap: wrap; gap: 15px; justify-content: center; }
+        .noise-item {
+            width: 80px; height: 80px; border-radius: 20px; background: var(--bg-color);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            cursor: pointer; transition: var(--transition-soft); color: var(--text-color);
+        }
+        .noise-item.playing { background: var(--primary-color); color: #fff; transform: translateY(-5px); box-shadow: 0 5px 15px rgba(184, 198, 219, 0.5); }
+        .noise-item i { font-size: 1.5rem; font-style: normal; margin-bottom: 5px; }
+        .volume-control { margin-top: 20px; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        input[type=range] { accent-color: var(--primary-color); }
+
+        /* --- 模块 5: 自我关怀清单 --- */
+        .care-list { list-style: none; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; }
+        .care-item {
+            display: flex; align-items: center; gap: 10px; cursor: pointer;
+            padding: 10px 15px; background: var(--bg-color); border-radius: 12px; transition: var(--transition-soft);
+        }
+        .care-item:hover { transform: translateX(5px); }
+        .care-item.done { opacity: 0.6; text-decoration: line-through; background: transparent; border: 1px dashed var(--primary-color); }
+        .care-checkbox { width: 18px; height: 18px; border: 2px solid var(--primary-color); border-radius: 50%; display: inline-block; transition: 0.3s; }
+        .care-item.done .care-checkbox { background: var(--primary-color); border-color: var(--primary-color); }
+        .add-care { display: flex; gap: 10px; margin-top: 20px; }
+        .add-care input { flex: 1; padding: 10px; border-radius: 20px; border: 1px solid var(--primary-color); background: transparent; color: var(--text-color); }
+
+        /* --- 模块 6: 时光相册 --- */
+        .file-input-wrapper { text-align: center; margin-bottom: 25px; }
+        #photo-input { display: none; }
+        #gallery-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 20px; }
         .photo-item {
-            background: #fff;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.03);
-            transition: all 0.3s;
-            position: relative;
+            border-radius: 12px; overflow: hidden; position: relative;
+            box-shadow: var(--shadow); transition: var(--transition-soft);
         }
-
-        .photo-item:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        .photo-item:hover { transform: translateY(-5px); box-shadow: 0 8px 25px rgba(245, 209, 195, 0.4); border-radius: 16px; }
+        .photo-item::after {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(to bottom, rgba(245, 209, 195, 0.2), transparent);
+            opacity: 0; transition: 0.4s; pointer-events: none;
         }
-
-        .photo-item img {
-            width: 100%;
-            height: 200px;
-            object-fit: cover;
-            display: block;
-        }
-
-        .photo-note {
-            padding: 15px;
-            font-size: 0.88rem;
-            color: #777;
-            text-align: center;
-            border-top: 1px solid #eee;
-        }
-        
+        .photo-item:hover::after { opacity: 1; }
+        .photo-item img { width: 100%; height: 180px; object-fit: cover; display: block; }
+        .photo-note { padding: 12px; font-size: 0.85rem; text-align: center; background: var(--card-bg); }
         .delete-btn {
-            position: absolute;
-            top: 8px;
-            right: 8px;
-            background: rgba(255,255,255,0.7);
-            color: #ff7875;
-            border: none;
-            border-radius: 50%;
-            width: 24px;
-            height: 24px;
-            cursor: pointer;
-            line-height: 22px;
-            font-size: 14px;
-            display: none;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            position: absolute; top: 10px; right: 10px; background: var(--toast-bg);
+            border: none; border-radius: 50%; width: 26px; height: 26px; cursor: pointer;
+            color: #ff7875; opacity: 0; transition: 0.3s; z-index: 2;
         }
-        
-        .photo-item:hover .delete-btn {
-            display: block;
-        }
+        .photo-item:hover .delete-btn { opacity: 1; }
 
-        /* 页脚 */
-        footer {
-            text-align: center;
-            font-size: 0.8rem;
-            color: #bbb;
-            margin-top: 40px;
-            padding: 20px;
-        }
+        .empty-state { text-align: center; color: #aaa; padding: 30px 0; font-size: 0.9rem; animation: pulse 2s infinite; }
+        @keyframes pulse { 0% { opacity: 0.6; } 50% { opacity: 1; } 100% { opacity: 0.6; } }
 
-        /* 响应式适配 */
         @media (max-width: 600px) {
             header h1 { font-size: 1.8rem; }
-            .container { padding: 10px; }
-            section { padding: 20px; }
-            h2.section-title { font-size: 1rem;}
-            #quote-text { font-size: 1.1rem; }
-            #gallery-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 15px;}
-            .photo-item img { height: 140px; }
+            .meditation-wrapper { flex-direction: column; }
+            #gallery-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
         }
     </style>
 </head>
 <body>
 
+<div id="toast-container"></div>
+<div id="confirm-modal">
+    <div class="confirm-box">
+        <p id="confirm-text">确定要执行此操作吗？</p>
+        <div class="confirm-btns">
+            <button class="btn-general" id="confirm-cancel">取消</button>
+            <button class="btn-solid" id="confirm-ok">确定</button>
+        </div>
+    </div>
+</div>
+
 <div class="container">
     <header>
+        <button class="theme-toggle" onclick="toggleTheme()" title="切换夜间模式">🌙</button>
         <h1>心灵港湾</h1>
         <p>停下来，遇见更好的自己</p>
     </header>
 
-    <section id="quotes">
+    <section class="fade-in-up" id="mood-tracker">
+        <h2 class="section-title">今日心情温度</h2>
+        <div class="thermometer" id="mood-scales">
+            <div class="mood-scale" onclick="saveMood(1)" title="低落">🌧️</div>
+            <div class="mood-scale" onclick="saveMood(2)" title="疲惫">☁️</div>
+            <div class="mood-scale" onclick="saveMood(3)" title="平静">⛅</div>
+            <div class="mood-scale" onclick="saveMood(4)" title="开心">☀️</div>
+            <div class="mood-scale" onclick="saveMood(5)" title="充满能量">🌈</div>
+        </div>
+        <p id="mood-text" style="font-size: 0.85rem; color: #888;">记录此刻感受，允许一切发生</p>
+        <div class="trend-bar" id="mood-trend"></div>
+    </section>
+
+    <section class="fade-in-up" id="quotes">
         <h2 class="section-title">每日心语</h2>
         <div id="quote-container">
-            <p id="quote-text">加载中...</p>
-            <p id="quote-author"></p>
-            <button class="btn-general" onclick="displayRandomQuote()">再听一句</button>
+            <p id="quote-text" class="quote-anim">加载中...</p>
+            <p id="quote-author" class="quote-anim"></p>
+            <button class="btn-general" onclick="displayRandomQuote()">换一句</button>
         </div>
     </section>
 
-    <section id="meditation">
-        <h2 class="section-title">呼吸空间 (4-7-8 呼吸法)</h2>
-        <div id="breathing-container">
-            <div class="circle-outer">
-                <div class="circle-inner" id="breathe-circle"></div>
+    <section class="fade-in-up" id="meditation">
+        <h2 class="section-title">内心空间</h2>
+        <div class="meditation-wrapper">
+            <div class="meditation-box">
+                <p style="margin-bottom: 15px; color: var(--primary-color);">4-7-8 呼吸法</p>
+                <div class="circle-outer"><div class="circle-inner" id="breathe-circle"></div></div>
+                <p id="breathe-text" style="height: 1.5rem;">准备好了吗？</p>
+                <button class="btn-general" id="breathe-btn" onclick="toggleBreathing()" style="margin-top: 10px;">开始呼吸</button>
             </div>
-            <p id="breathe-text">准备好了吗？</p>
-            <button class="btn-general" id="breathe-btn" onclick="toggleBreathing()">开始</button>
+            <div class="meditation-box">
+                <p style="margin-bottom: 15px; color: var(--accent-color);">正念引导</p>
+                <div style="display: flex; gap: 10px; justify-content: center; margin-bottom: 15px;">
+                    <button class="btn-general" style="padding: 5px 15px;" onclick="startMeditation(3)">3分钟</button>
+                    <button class="btn-general" style="padding: 5px 15px;" onclick="startMeditation(5)">5分钟</button>
+                </div>
+                <div class="progress-bg"><div class="progress-bar" id="med-progress"></div></div>
+                <p id="med-text" style="height: 3rem; font-size: 0.9rem; transition: opacity 1s;">选择时长，开始静心之旅...</p>
+                <button class="btn-general" id="med-stop-btn" onclick="stopMeditation()" style="display: none; margin-top: 10px; border-color: #ff7875; color: #ff7875;">轻轻结束</button>
+            </div>
         </div>
     </section>
 
-    <section id="gallery">
+    <section class="fade-in-up" id="white-noise">
+        <h2 class="section-title">自然之声</h2>
+        <p style="text-align: center; font-size: 0.8rem; margin-bottom: 15px; color:#aaa;">* 请确保设备未静音</p>
+        <div class="noise-grid">
+            <div class="noise-item" onclick="toggleNoise('rain', this)"><i>🌧️</i>细雨</div>
+            <div class="noise-item" onclick="toggleNoise('forest', this)"><i>🌲</i>森林</div>
+            <div class="noise-item" onclick="toggleNoise('stream', this)"><i>🌊</i>溪流</div>
+            <div class="noise-item" onclick="toggleNoise('fire', this)"><i>🔥</i>篝火</div>
+            <div class="noise-item" onclick="toggleNoise('piano', this)"><i>🎹</i>轻琴</div>
+        </div>
+        <div class="volume-control">
+            <span>🔈</span>
+            <input type="range" id="noise-volume" min="0" max="1" step="0.1" value="0.5" onchange="updateVolume(this.value)">
+            <span>🔊</span>
+        </div>
+        <audio id="audio-rain" loop src=""></audio>
+        <audio id="audio-forest" loop src=""></audio>
+        <audio id="audio-stream" loop src=""></audio>
+        <audio id="audio-fire" loop src=""></audio>
+        <audio id="audio-piano" loop src=""></audio>
+    </section>
+
+    <section class="fade-in-up" id="self-care">
+        <h2 class="section-title">自我关怀清单</h2>
+        <ul class="care-list" id="care-ul"></ul>
+        <div class="add-care">
+            <input type="text" id="new-care-input" placeholder="添加一件爱自己的小事...">
+            <button class="btn-solid" onclick="addCareItem()">添加</button>
+        </div>
+    </section>
+
+    <section class="fade-in-up" id="diary">
+        <h2 class="section-title">心情小记</h2>
+        <div class="diary-input-area">
+            <textarea class="diary-textarea" id="diary-content" rows="3" placeholder="写下此刻的思绪，烦恼会随字迹飘散..."></textarea>
+            <div style="text-align: right;">
+                <button class="btn-solid" onclick="saveDiary()">封存此刻</button>
+            </div>
+        </div>
+        <div class="diary-list" id="diary-list-container"></div>
+    </section>
+
+    <section class="fade-in-up" id="gallery">
         <h2 class="section-title">时光相册</h2>
-        <p style="text-align:center; font-size:0.8rem; color:#aaa; margin-bottom:15px;">* 照片仅保存在您的本地浏览器中，我们不会收集。</p>
-        <div id="gallery-controls">
-            <div class="file-input-wrapper">
-                <button class="btn-upload">添加美好瞬间</button>
-                <input type="file" id="photo-input" accept="image/*">
-            </div>
+        <div class="file-input-wrapper">
+            <button class="btn-solid" onclick="document.getElementById('photo-input').click()">留住美好瞬间</button>
+            <input type="file" id="photo-input" accept="image/*">
         </div>
-        <div id="gallery-grid">
-            </div>
+        <div id="gallery-grid"></div>
     </section>
 
     <footer>
-        <p>© 2023 心灵港湾 · 这是一个隐私友好的疗愈小站</p>
+        <p>© 2026 心灵港湾 · 隐私安全，仅留存于你的设备</p>
     </footer>
 </div>
 
 <script>
-    // --- 数据：93 条暖心话语 ---
-    const quotes = [
-        { text: "在这个嘈杂的世界里，你的存在本身就是一种美好。", author: "佚名" },
-        { text: "没关系，你可以不用总是那么坚强。", author: "心理学寄语" },
-        { text: "凡是过往，皆为序章。无论发生什么，都要相信自己有重启的能力。", author: "灵魂独白" },
-        { text: "心理健康不是没有问题，而是拥有应对问题的能力。", author: "佚名" },
-        { text: "你不需要变得完美，你只需要变得真实。", author: "卡尔·罗杰斯" },
-        { text: "每个人都是一本书，不要因为错过了一章，就全盘否定整本书。", author: "佚名" },
-        { text: "接纳自己，是疗愈的开始。", author: "佚名" },
-        { text: "慢慢来，比较快。给时间一点时间。", author: "生活哲学" },
-        { text: "即使在最黑暗的夜晚，星星依然闪烁。", author: "佚名" },
-        { text: "你值得被温柔以待，首先请你温柔对待自己。", author: "灵魂独白" },
-        { text: "你不仅是问题的拥有者，更是答案的持有者。", author: "佚名" },
-        { text: "每一个不曾起舞的日子，都是对生命的辜负。", author: "尼采 (寓意引导)" },
-        { text: "焦虑是自由的眩晕。", author: "克尔凯郭尔" },
-        { text: "你生命中唯一的束缚，就是你对自己的限制。", author: "佚名" },
-        { text: "世界以痛吻我，要我报之以歌。", author: "泰戈尔" },
-        { text: "你的内心，藏着一个不曾向任何人敞开的港湾。", author: "佚名" },
-        { text: "所有的迷茫，最后都会变成坚定的力量。", author: "佚名" },
-        { text: "真正的勇敢，是当你依然感到恐惧时，还能向前迈进。", author: "佚名" },
-        { text: "你不必满足别人的期待，你只需为自己而活。", author: "灵魂独白" },
-        { text: "爱自己，是一生浪漫的开始。", author: "王尔德" },
-        { text: "即使世界一片灰暗，你的眼里依然有星星。", author: "佚名" },
-        { text: "所有的相遇，都是久别重逢。遇见更好的自己。", author: "佚名" },
-        { text: "接纳自己最深沉的悲伤，你才能拥有最深沉的喜悦。", author: "佚名" },
-        { text: "你不必变得像别人，你只需变得越来越像你。", author: "卡尔·荣格" },
-        { text: "真正的心理韧性，是摔倒后依然有爬起来的力量。", author: "佚名" },
-        { text: "允许自己悲伤，允许自己哭泣，那也是力量的一部分。", author: "佚名" },
-        { text: "你的生命，是一份不曾被拆开的礼物。", author: "佚名" },
-        { text: "你可以慢慢来，不必每天都过得有意义。", author: "生活哲学" },
-        { text: "你的过去不能定义你的未来。", author: "佚名" },
-        { text: "在这个充满不确定的世界里，你是唯一的确定。", author: "佚名" },
-        { text: "你可以有情绪，但不要让情绪控制你。", author: "佚名" },
-        { text: "所有的痛苦，都是通往成长的旅途。", author: "佚名" },
-        { text: "你拥有的，比你想象的要多。", author: "佚名" },
-        { text: "你不必完美，你只需要被看到、被听到。", author: "卡尔·罗杰斯" },
-        { text: "生命就像一条河，有时平缓，有时湍急。接受它的节奏。", author: "佚名" },
-        { text: "你是一个不可复制的存在。", author: "佚名" },
-        { text: "接纳现在的自己，因为你是通往更好自己的唯一路径。", author: "佚名" },
-        { text: "即使生活不尽如人意，你依然可以创造属于自己的温暖角落。", author: "生活哲学" },
-        { text: "每一个选择，都在塑造你的命运。", author: "佚名" },
-        { text: "真正的自由，是你可以选择如何应对生活中的不确定。", author: "佚名" },
-        { text: "你不必一直追赶，允许自己休息，也是一种前进方式。", author: "佚名" },
-        { text: "你的身体是心灵的殿堂，善待它。", author: "佚名" },
-        { text: "每一个困难，都蕴含着发展的机会。", author: "佚名" },
-        { text: "你不是一个人在战斗。", author: "佚名" },
-        { text: "保持一颗童心，你能在这个复杂的社会活得更简单。", author: "佚名" },
-        { text: "你不必让每一个人都喜欢你。", author: "佚名" },
-        { text: "爱是最终的答案。", author: "佚名" },
-        { text: "即使只有一点点希望，也要紧紧抓住。", author: "佚名" },
-        { text: "你的生命，是一首未完的诗。", author: "佚名" },
-        { text: "在无常的生活中，寻找内心的恒定。", author: "佚名" },
-        { text: "你不必追求别人所追求的一切，找到适合自己的就好。", author: "佚名" },
-        { text: "感恩你所拥有的一切，哪怕只是微不足道的小事。", null },
-        { text: "每一个清晨，都是新的开始。", author: "佚名" },
-        { text: "真正的成熟，是你能接纳世界的多元和不完美。", null },
-        { text: "你不必一直成功，允许自己失败，也是一种智慧。", author: "佚名" },
-        { text: "心灵可以受伤，但也拥有愈合的能力。", author: "佚名" },
-        { text: "你的生命是一场冒险，去体验它的每一个方面。", author: "佚名" },
-        { text: "保持好奇，你能在这个世界发现更多美好。", null },
-        { text: "你不必孤独地面对一切。", author: "佚名" },
-        { text: "接纳自己的软弱，它是你内心真实的存在。", author: "佚名" },
-        { text: "每一个笑容，都能温暖一段时光。", author: "佚名" },
-        { text: "你的过去，是你成长的养分。", author: "佚名" },
-        { text: "在繁忙的生活中，给自己留一点时间静心。", null },
-        { text: "你不必知道所有的答案，允许自己在探索中成长。", author: "佚名" },
-        { text: "保持一颗慈悲的心，对待自己和他人。", null },
-        { text: "你不必拥有最完美的人生，只要拥有你的人生。", author: "佚名" },
-        { text: "每一个瞬间，都值得珍惜。", author: "佚名" },
-        { text: "你的生命，是一份不曾被定义的力量。", author: "佚名" },
-        { text: "即使道路艰难，坚持下去，总能看到希望。", author: "佚名" },
-        { text: "保持谦卑，在这个广阔的世界里，我们只是沧海一粟。", author: "佚名" },
-        { text: "你拥有疗愈自己的能量。", author: "佚名" },
-        { text: "你不必满足别人的完美标准。", author: "佚名" },
-        { text: "每一个结束，都是新的开始。", author: "佚名" },
-        { text: "在繁忙的生活中，寻找内心的宁静点。", author: "佚名" },
-        { text: "真正的幸福，来自于内心的充实和满足。", author: "佚名" },
-        { text: "爱，是连接每一个生命的桥梁。", author: "佚名" },
-        { text: "你不必变得像别人，你只需变得越来越像你。", author: "佚名" },
-        { text: "保持一颗宽容的心，接纳生活的不公和遗憾。", author: "佚名" },
-        { text: "真正的勇气，是在平凡的生活中依然追求美好。", author: "佚名" },
-        { text: "每一个不曾被定义的时刻，都是你重新出发的机会。", null },
-        { text: "你是一道光，能点亮自己和周围的世界。", author: "佚名" },
-        { text: "即使逆境重重，依然要有追求梦想的勇气。", author: "佚名" },
-        { text: "在喧嚣的生活中，寻找内心的恒定节奏。", null },
-        { text: "真正的智慧，是你能接纳无常和变化。", author: "佚名" },
-        { text: "你不必孤独前行，我们在这里陪你。", author: "心灵港湾" },
-        { text: "爱自己，是一生浪漫的开始。", null },
-        { text: "每一个笑容，都能传递希望和力量。", author: "佚名" },
-        { text: "心灵是可以愈合的。", author: "佚名" },
-        { text: "你不必追求虚幻的完美，真实活着就好。", null },
-        { text: "真正的平静，不是没有烦恼，而是懂得如何应对烦恼。", author: "佚名" },
-        { text: "爱，是最终的港湾。", author: "佚名" },
-        { text: "生命就像一张白纸，每一个瞬间都在填色。", null },
-        { text: "你的生命是一份独特的艺术品。", author: "佚名" }
-    ];
-
-    // --- 功能 1: 随机显示心语 ---
-    function displayRandomQuote() {
-        const textElement = document.getElementById('quote-text');
-        const authorElement = document.getElementById('quote-author');
-        
-        textElement.style.opacity = 0;
-        authorElement.style.opacity = 0;
-
-        setTimeout(() => {
-            const randomIndex = Math.floor(Math.random() * quotes.length);
-            const quote = quotes[randomIndex];
-            textElement.innerText = `“${quote.text}”`;
-            authorElement.innerText = quote.author ? `—— ${quote.author}` : "—— 佚名";
-            
-            textElement.style.opacity = 1;
-            authorElement.style.opacity = 1;
-        }, 300);
+    /* --- 核心工具：弹窗与 Observer --- */
+    function showWarmToast(msg) {
+        const container = document.getElementById('toast-container');
+        const toast = document.createElement('div');
+        toast.className = 'toast';
+        toast.innerText = msg;
+        container.appendChild(toast);
+        setTimeout(() => toast.remove(), 2900);
     }
 
-    // --- 功能 2: 完整 4-7-8 呼吸空间逻辑 ---
-    let isBreathing = false;
-    let currentBreathePhase = null;
-    let bIntervalId = null;
+    function showWarmConfirm(msg, onConfirm) {
+        const modal = document.getElementById('confirm-modal');
+        document.getElementById('confirm-text').innerText = msg;
+        modal.classList.add('active');
+        
+        const btnOk = document.getElementById('confirm-ok');
+        const btnCancel = document.getElementById('confirm-cancel');
+        
+        const cleanup = () => {
+            modal.classList.remove('active');
+            btnOk.removeEventListener('click', okHandler);
+            btnCancel.removeEventListener('click', cleanup);
+        };
+        const okHandler = () => { onConfirm(); cleanup(); };
+        
+        btnOk.addEventListener('click', okHandler);
+        btnCancel.addEventListener('click', cleanup);
+    }
 
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if(entry.isIntersecting) entry.target.classList.add('visible');
+        });
+    }, { threshold: 0.1 });
+    document.querySelectorAll('.fade-in-up').forEach(el => observer.observe(el));
+
+    /* --- 主题切换 --- */
+    function toggleTheme() {
+        const html = document.documentElement;
+        const current = html.getAttribute('data-theme');
+        const next = current === 'light' ? 'dark' : 'light';
+        html.setAttribute('data-theme', next);
+        localStorage.setItem('harbor_theme', next);
+        showWarmToast(next === 'dark' ? '已为你调暗灯光 🌙' : '阳光照进来了 ☀️');
+    }
+
+    /* --- 初始化 --- */
+    document.addEventListener('DOMContentLoaded', () => {
+        const savedTheme = localStorage.getItem('harbor_theme') || 'light';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+        
+        displayRandomQuote();
+        renderMoodTrend();
+        renderCareList();
+        renderDiary();
+        loadLocalPhotos();
+    });
+
+    /* --- 0. 心情打卡 --- */
+    function saveMood(score) {
+        const today = new Date().toLocaleDateString();
+        let moods = JSON.parse(localStorage.getItem('harbor_moods') || '{}');
+        moods[today] = score;
+        localStorage.setItem('harbor_moods', JSON.stringify(moods));
+        
+        document.querySelectorAll('.mood-scale').forEach(el => el.classList.remove('active'));
+        event.currentTarget.classList.add('active');
+        showWarmToast('收到你的心情信号，无论好坏，都抱抱你 ✨');
+        renderMoodTrend();
+    }
+    
+    function renderMoodTrend() {
+        const moods = JSON.parse(localStorage.getItem('harbor_moods') || '{}');
+        const container = document.getElementById('mood-trend');
+        container.innerHTML = '';
+        const dates = Object.keys(moods).slice(-7); // 近7天
+        if(dates.length === 0) {
+            container.innerHTML = '<span style="color:#aaa;font-size:0.8rem;">点亮上方图标开启记录</span>';
+            return;
+        }
+        dates.forEach(date => {
+            const h = moods[date] * 20; // 1-5分对应20-100px
+            const bar = document.createElement('div');
+            bar.className = 'trend-item';
+            bar.style.height = '0px';
+            bar.title = `${date}: ${moods[date]}分`;
+            container.appendChild(bar);
+            setTimeout(() => bar.style.height = h + 'px', 100);
+        });
+    }
+
+    /* --- 1. 每日心语 --- */
+    const quotes = [
+        "在这个嘈杂的世界里，你的存在本身就是一种美好。",
+        "没关系，你可以不用总是那么坚强。",
+        "凡是过往，皆为序章。相信自己有重启的能力。",
+        "慢慢来，比较快。给时间一点时间。",
+        "你不需要变得完美，你只需要变得真实。",
+        "允许自己悲伤，允许自己哭泣，那也是力量的一部分。",
+        "爱自己，是一生浪漫的开始。"
+    ];
+    function displayRandomQuote() {
+        const textEl = document.getElementById('quote-text');
+        textEl.classList.add('quote-hidden');
+        setTimeout(() => {
+            textEl.innerText = `“${quotes[Math.floor(Math.random() * quotes.length)]}”`;
+            textEl.classList.remove('quote-hidden');
+        }, 500);
+    }
+
+    /* --- 2. 呼吸与冥想 --- */
+    let isBreathing = false, bIntervalId = null;
     function toggleBreathing() {
         const btn = document.getElementById('breathe-btn');
         const circle = document.getElementById('breathe-circle');
         const text = document.getElementById('breathe-text');
 
         if (!isBreathing) {
-            isBreathing = true;
-            btn.innerText = "停止";
-            currentBreathePhase = 0; // 0: inhale, 1: hold, 2: exhale
-            runBreathingCycle(circle, text);
+            isBreathing = true; btn.innerText = "停止呼吸";
+            runBreatheCycle(circle, text, 0);
         } else {
-            // 停止
-            isBreathing = false;
-            btn.innerText = "开始";
-            text.innerText = "准备好了吗？";
-            text.style.color = var(--primary-color);
-            clearBreatheState(circle);
+            isBreathing = false; btn.innerText = "开始呼吸";
+            text.innerText = "做得很好，休息一下"; text.style.color = "var(--primary-color)";
+            clearTimeout(bIntervalId);
+            circle.className = 'circle-inner'; 
         }
     }
-
-    // 核心循环控制
-    function runBreathingCycle(circle, text) {
+    function runBreatheCycle(circle, text, phase) {
         if (!isBreathing) return;
+        const phases = [
+            { t: "深深吸气...", c: "inhale", d: 4000, color: "var(--primary-color)" },
+            { t: "感受气流，屏住...", c: "hold", d: 7000, color: "var(--accent-color)" },
+            { t: "缓缓呼出，放松...", c: "exhale", d: 8000, color: "var(--text-color)" }
+        ];
+        text.innerText = phases[phase].t; text.style.color = phases[phase].color;
+        circle.className = `circle-inner ${phases[phase].c}`;
+        bIntervalId = setTimeout(() => runBreatheCycle(circle, text, (phase + 1) % 3), phases[phase].d);
+    }
 
-        let duration;
-        let nextPhase;
+    let medInterval, medTimeLeft, medTotal;
+    const medTexts = ["感受身体与座椅的接触...", "聆听周围细微的声音...", "思绪飘走也没关系，温柔地拉回来...", "吸气，接纳此刻...", "呼气，放下执念..."];
+    function startMeditation(minutes) {
+        document.getElementById('med-stop-btn').style.display = 'inline-block';
+        medTotal = minutes * 60; medTimeLeft = medTotal;
+        document.getElementById('med-progress').style.width = '0%';
+        clearInterval(medInterval);
+        showWarmToast('深呼吸，我们开始 🍃');
+        
+        let textIdx = 0;
+        medInterval = setInterval(() => {
+            medTimeLeft--;
+            document.getElementById('med-progress').style.width = `${((medTotal - medTimeLeft) / medTotal) * 100}%`;
+            
+            if (medTimeLeft % 15 === 0) { // 每15秒换句引导语
+                const textEl = document.getElementById('med-text');
+                textEl.style.opacity = 0;
+                setTimeout(() => { textEl.innerText = medTexts[textIdx % medTexts.length]; textEl.style.opacity = 1; textIdx++; }, 1000);
+            }
+            if (medTimeLeft <= 0) stopMeditation(true);
+        }, 1000);
+    }
+    function stopMeditation(finished = false) {
+        clearInterval(medInterval);
+        document.getElementById('med-progress').style.width = '0%';
+        document.getElementById('med-text').innerText = finished ? "冥想结束，愿你带着平静继续今天 ✨" : "已暂停，随时欢迎回来";
+        document.getElementById('med-stop-btn').style.display = 'none';
+    }
 
-        // 根据阶段设置文本和动画
-        switch (currentBreathePhase) {
-            case 0: // 吸气 (4s)
-                text.innerText = "吸气... (4秒)";
-                text.style.color = "#a7bbc7"; // 柔蓝
-                circle.classList.add('inhale');
-                duration = 4000;
-                nextPhase = 1;
-                break;
-            case 1: // 屏息 (7s)
-                text.innerText = "屏住呼吸... (7秒)";
-                text.style.color = "#f5d1c3"; // 柔粉
-                circle.classList.remove('inhale');
-                circle.classList.add('hold');
-                duration = 7000;
-                nextPhase = 2;
-                break;
-            case 2: // 呼气 (8s)
-                text.innerText = "呼气... (8秒)";
-                text.style.color = "#bbb"; 
-                circle.classList.remove('hold');
-                circle.classList.add('exhale');
-                duration = 8000;
-                nextPhase = 0;
-                break;
+    /* --- 3. 白噪音 --- */
+    let activeNoise = null;
+    function toggleNoise(type, el) {
+        const audio = document.getElementById(`audio-${type}`);
+        // 演示逻辑：由于没有真实音频链接，仅做UI反馈
+        if (activeNoise && activeNoise !== type) {
+            document.getElementById(`audio-${activeNoise}`).pause();
+            document.querySelector('.noise-item.playing')?.classList.remove('playing');
         }
+        if (el.classList.contains('playing')) {
+            el.classList.remove('playing'); audio.pause(); activeNoise = null;
+        } else {
+            el.classList.add('playing'); 
+            activeNoise = type;
+            // audio.play().catch(e => console.log('无有效音频源'));
+            showWarmToast(`已开启${el.innerText}声音 (需配置真实音频文件)`);
+        }
+    }
+    function updateVolume(val) { document.querySelectorAll('audio').forEach(a => a.volume = val); }
 
-        // 设置下一个阶段的定时器
-        bIntervalId = setTimeout(() => {
-            if (!isBreathing) return;
-            currentBreathePhase = nextPhase;
-            runBreathingCycle(circle, text); // 递归调用
-        }, duration);
+    /* --- 4. 自我关怀清单 --- */
+    const defaultCare = [{id:1, t:"喝一杯温水", d:false}, {id:2, t:"深呼吸5次", d:false}, {id:3, t:"放下手机发呆3分钟", d:false}];
+    function getCareList() { return JSON.parse(localStorage.getItem('harbor_care') || JSON.stringify(defaultCare)); }
+    function renderCareList() {
+        const list = getCareList();
+        const ul = document.getElementById('care-ul');
+        ul.innerHTML = list.map(item => `
+            <li class="care-item ${item.d ? 'done' : ''}" onclick="toggleCare(${item.id})">
+                <span class="care-checkbox"></span><span>${item.t}</span>
+            </li>`).join('');
+    }
+    function toggleCare(id) {
+        let list = getCareList();
+        const item = list.find(i => i.id === id);
+        if(item) { item.d = !item.d; localStorage.setItem('harbor_care', JSON.stringify(list)); renderCareList(); }
+    }
+    function addCareItem() {
+        const input = document.getElementById('new-care-input');
+        if(!input.value.trim()) return;
+        let list = getCareList();
+        list.push({id: Date.now(), t: input.value.trim(), d: false});
+        localStorage.setItem('harbor_care', JSON.stringify(list));
+        input.value = ''; renderCareList(); showWarmToast('已加入清单 📝');
     }
 
-    function clearBreatheState(circle) {
-        clearTimeout(bIntervalId);
-        circle.classList.remove('inhale', 'hold', 'exhale');
-        circle.style.transform = 'scale(1)'; // 重置大小
+    /* --- 5. 心情日记 --- */
+    function saveDiary() {
+        const content = document.getElementById('diary-content').value.trim();
+        if(!content) { showWarmToast('写点什么再封存吧~'); return; }
+        let diaries = JSON.parse(localStorage.getItem('harbor_diary') || '[]');
+        diaries.unshift({ id: Date.now(), time: new Date().toLocaleString(), content });
+        localStorage.setItem('harbor_diary', JSON.stringify(diaries));
+        document.getElementById('diary-content').value = '';
+        renderDiary();
+        showWarmToast('思绪已温柔封存 🌸');
+    }
+    function renderDiary() {
+        const diaries = JSON.parse(localStorage.getItem('harbor_diary') || '[]');
+        const container = document.getElementById('diary-list-container');
+        if(diaries.length === 0) { container.innerHTML = '<div class="empty-state">还没有记录呢，写下第一条吧~</div>'; return; }
+        container.innerHTML = diaries.map(d => `
+            <div class="diary-item">
+                <div class="diary-time">${d.time}</div>
+                <div>${d.content}</div>
+                <span class="diary-del" onclick="deleteDiary(${d.id})">✖</span>
+            </div>`).join('');
+    }
+    function deleteDiary(id) {
+        showWarmConfirm("确定要抹去这段记忆吗？", () => {
+            let diaries = JSON.parse(localStorage.getItem('harbor_diary') || '[]');
+            localStorage.setItem('harbor_diary', JSON.stringify(diaries.filter(d => d.id !== id)));
+            renderDiary();
+        });
     }
 
-    // --- 功能 3: 本地时光相册逻辑 (LocalStorage) ---
-    const photoInput = document.getElementById('photo-input');
-    const galleryGrid = document.getElementById('gallery-grid');
-
-    photoInput.addEventListener('change', function(e) {
+    /* --- 6. 时光相册 --- */
+    document.getElementById('photo-input').addEventListener('change', function(e) {
         const file = e.target.files[0];
         if (!file) return;
-
-        // 限制文件大小，建议 < 2MB
-        if (file.size > 2 * 1024 * 1024) {
-            alert("为了保证浏览器运行流畅，请上传小于 2MB 的照片。您可以尝试使用压缩后的照片。");
-            return;
-        }
-
+        if (file.size > 1.5 * 1024 * 1024) { showWarmToast("✨ 照片有点大哦，压缩一下会更流畅～"); return; }
+        
         const reader = new FileReader();
         reader.onload = function(event) {
-            const base64Image = event.target.result;
-            const note = prompt("为这张照片写下一句暖心的话吧 (可选):") || "美好瞬间";
-            
-            savePhotoToLocal(base64Image, note);
-            loadLocalPhotos(); // 刷新显示
+            let photos = JSON.parse(localStorage.getItem('harbor_photos') || '[]');
+            photos.unshift({ id: Date.now(), data: event.target.result, note: "美好瞬间" });
+            try {
+                localStorage.setItem('harbor_photos', JSON.stringify(photos));
+                loadLocalPhotos(); showWarmToast('留住这份美好 ✨');
+            } catch (e) { showWarmToast("浏览器空间满了，清理一下旧照片吧"); }
         };
         reader.readAsDataURL(file);
     });
 
-    function savePhotoToLocal(base64Data, note) {
-        let photos = JSON.parse(localStorage.getItem('my_warm_photos') || '[]');
-        photos.unshift({ id: Date.now(), data: base64Data, note: note });
-        
-        try {
-            localStorage.setItem('my_warm_photos', JSON.stringify(photos));
-        } catch (e) {
-            alert("浏览器存储空间已满（通常为5MB），无法添加更多照片。请尝试删除旧照片。");
-            photos.shift();
-        }
-    }
-
     function loadLocalPhotos() {
-        const photos = JSON.parse(localStorage.getItem('my_warm_photos') || '[]');
-        galleryGrid.innerHTML = ''; 
-
-        if (photos.length === 0) {
-            galleryGrid.innerHTML = '<p style="grid-column: 1/-1; text-align:center; color:#ccc; padding:40px 0;">这里还空空的，上传第一张温暖的照片吧。</p>';
-            return;
-        }
-
-        photos.forEach(photo => {
-            const div = document.createElement('div');
-            div.className = 'photo-item';
-            div.innerHTML = `
-                <img src="${photo.data}" alt="warm memory">
-                <button class="delete-btn" onclick="deletePhoto(${photo.id})">×</button>
-                <div class="photo-note">${photo.note}</div>
-            `;
-            galleryGrid.appendChild(div);
-        });
+        const photos = JSON.parse(localStorage.getItem('harbor_photos') || '[]');
+        const grid = document.getElementById('gallery-grid');
+        if (photos.length === 0) { grid.innerHTML = '<div class="empty-state" style="grid-column: 1/-1;">这里空空的，添加第一张温暖吧</div>'; return; }
+        grid.innerHTML = photos.map(p => `
+            <div class="photo-item">
+                <img src="${p.data}" alt="memory">
+                <button class="delete-btn" onclick="deletePhoto(${p.id})">✖</button>
+                <div class="photo-note">${p.note}</div>
+            </div>`).join('');
     }
     
     function deletePhoto(id) {
-        if(!confirm("确定要删除这张珍贵的记忆吗？")) return;
-        let photos = JSON.parse(localStorage.getItem('my_warm_photos') || '[]');
-        photos = photos.filter(p => p.id !== id);
-        localStorage.setItem('my_warm_photos', JSON.stringify(photos));
-        loadLocalPhotos();
+        showWarmConfirm("确定要删除这份回忆吗？删除后无法恢复哦～", () => {
+            let photos = JSON.parse(localStorage.getItem('harbor_photos') || '[]');
+            localStorage.setItem('harbor_photos', JSON.stringify(photos.filter(p => p.id !== id)));
+            loadLocalPhotos();
+        });
     }
-
-    // --- 页面初始加载 ---
-    document.addEventListener('DOMContentLoaded', () => {
-        displayRandomQuote(); // 显示第一句暖心话
-        loadLocalPhotos(); // 加载本地照片
-    });
 </script>
-
 </body>
 </html>
