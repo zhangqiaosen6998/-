@@ -13,6 +13,7 @@
             --accent-color: #f5d1c3; /* 柔粉 */
             --card-bg: #ffffff;
             --shadow: 0 4px 15px rgba(0,0,0,0.05);
+            --border-radius: 20px;
         }
 
         * {
@@ -59,7 +60,7 @@
             margin-bottom: 50px;
             background: var(--card-bg);
             padding: 30px;
-            border-radius: 20px;
+            border-radius: var(--border-radius);
             box-shadow: var(--shadow);
         }
 
@@ -84,7 +85,7 @@
         /* --- 1. 心语卡片 --- */
         #quote-container {
             text-align: center;
-            min-height: 150px;
+            min-height: 180px;
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -96,25 +97,28 @@
             color: #4a4a4a;
             margin-bottom: 20px;
             font-weight: 300;
+            transition: opacity 0.3s;
         }
 
         #quote-author {
             font-size: 0.9rem;
             color: #999;
+            transition: opacity 0.3s;
         }
 
-        .btn-refresh {
+        .btn-general {
             background: none;
             border: 1px solid var(--primary-color);
             color: var(--primary-color);
-            padding: 8px 20px;
+            padding: 8px 25px;
             border-radius: 20px;
             cursor: pointer;
             margin-top: 20px;
             transition: all 0.3s;
+            font-size: 0.9rem;
         }
 
-        .btn-refresh:hover {
+        .btn-general:hover {
             background: var(--primary-color);
             color: white;
         }
@@ -128,8 +132,8 @@
         }
 
         .circle-outer {
-            width: 150px;
-            height: 150px;
+            width: 160px;
+            height: 160px;
             background: #e6eef8;
             border-radius: 50%;
             display: flex;
@@ -137,37 +141,63 @@
             align-items: center;
             margin-bottom: 20px;
             position: relative;
+            box-shadow: 0 0 10px rgba(0,0,0,0.02);
         }
 
         .circle-inner {
-            width: 50px;
-            height: 50px;
+            width: 40px; /* 基础大小 */
+            height: 40px;
             background: var(--primary-color);
             border-radius: 50%;
             opacity: 0.8;
-            /* 动画定义在 JS 中触发 */
+            /* 动画定义在 JS 中通过类名切换 */
+            transition: transform 0.2s ease-out; /* 默认过渡 */
         }
         
-        @keyframes breathe {
-            0% { transform: scale(1); }
-            45% { transform: scale(2.8); } /* 吸气 */
-            55% { transform: scale(2.8); } /* 屏息 */
-            100% { transform: scale(1); } /* 呼气 */
+        /* 呼吸动画状态类 */
+        .circle-inner.inhale {
+            transition: transform 4s linear;
+            transform: scale(3.5); /* 放大吸气 */
+            background: var(--primary-color);
+        }
+        
+        .circle-inner.hold {
+            transition: none; /* 屏息时不移动 */
+            transform: scale(3.5); /* 保持放大 */
+            background: var(--accent-color); /* 变柔粉 */
+        }
+
+        .circle-inner.exhale {
+            transition: transform 8s linear;
+            transform: scale(1); /* 缩小呼气 */
+            background: #bbb; /* 变灰 */
         }
 
         #breathe-text {
-            font-size: 1rem;
+            font-size: 1.1rem;
             color: var(--primary-color);
             font-weight: bold;
+            height: 1.2rem;
+            display: flex;
+            align-items: center;
+        }
+
+        #breathe-btn {
+            background-color: var(--accent-color);
+            border: none;
+            color: white;
+        }
+        #breathe-btn:hover {
+            opacity: 0.9;
+            background-color: var(--accent-color);
         }
 
         /* --- 3. 时光相册 --- */
         #gallery-controls {
             text-align: center;
-            margin-bottom: 20px;
+            margin-bottom: 25px;
         }
 
-        /* 自定义上传按钮样式 */
         .file-input-wrapper {
             position: relative;
             overflow: hidden;
@@ -178,10 +208,15 @@
             border: none;
             background-color: var(--accent-color);
             color: white;
-            padding: 10px 25px;
+            padding: 10px 30px;
             border-radius: 25px;
             cursor: pointer;
             font-size: 1rem;
+            box-shadow: var(--shadow);
+            transition: opacity 0.3s;
+        }
+        .btn-upload:hover {
+            opacity: 0.9;
         }
 
         #photo-input {
@@ -190,38 +225,41 @@
             top: 0;
             opacity: 0;
             cursor: pointer;
+            width: 100%;
+            height: 100%;
         }
 
         #gallery-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 25px;
             margin-top: 20px;
         }
 
         .photo-item {
             background: #fff;
-            border-radius: 10px;
+            border-radius: 12px;
             overflow: hidden;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-            transition: transform 0.3s;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+            transition: all 0.3s;
             position: relative;
         }
 
         .photo-item:hover {
             transform: translateY(-5px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
         }
 
         .photo-item img {
             width: 100%;
-            height: 180px;
+            height: 200px;
             object-fit: cover;
             display: block;
         }
 
         .photo-note {
-            padding: 10px;
-            font-size: 0.85rem;
+            padding: 15px;
+            font-size: 0.88rem;
             color: #777;
             text-align: center;
             border-top: 1px solid #eee;
@@ -229,18 +267,19 @@
         
         .delete-btn {
             position: absolute;
-            top: 5px;
-            right: 5px;
+            top: 8px;
+            right: 8px;
             background: rgba(255,255,255,0.7);
             color: #ff7875;
             border: none;
             border-radius: 50%;
-            width: 20px;
-            height: 20px;
+            width: 24px;
+            height: 24px;
             cursor: pointer;
-            line-height: 18px;
-            font-size: 12px;
+            line-height: 22px;
+            font-size: 14px;
             display: none;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
         
         .photo-item:hover .delete-btn {
@@ -252,7 +291,8 @@
             text-align: center;
             font-size: 0.8rem;
             color: #bbb;
-            margin-top: 30px;
+            margin-top: 40px;
+            padding: 20px;
         }
 
         /* 响应式适配 */
@@ -260,8 +300,10 @@
             header h1 { font-size: 1.8rem; }
             .container { padding: 10px; }
             section { padding: 20px; }
-            #gallery-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px;}
-            .photo-item img { height: 120px; }
+            h2.section-title { font-size: 1rem;}
+            #quote-text { font-size: 1.1rem; }
+            #gallery-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 15px;}
+            .photo-item img { height: 140px; }
         }
     </style>
 </head>
@@ -278,7 +320,7 @@
         <div id="quote-container">
             <p id="quote-text">加载中...</p>
             <p id="quote-author"></p>
-            <button class="btn-refresh" onclick="displayRandomQuote()">再听一句</button>
+            <button class="btn-general" onclick="displayRandomQuote()">再听一句</button>
         </div>
     </section>
 
@@ -289,7 +331,7 @@
                 <div class="circle-inner" id="breathe-circle"></div>
             </div>
             <p id="breathe-text">准备好了吗？</p>
-            <button class="btn-refresh" id="breathe-btn" onclick="toggleBreathing()">开始</button>
+            <button class="btn-general" id="breathe-btn" onclick="toggleBreathing()">开始</button>
         </div>
     </section>
 
@@ -307,23 +349,106 @@
     </section>
 
     <footer>
-        <p>© 2023 心灵港湾 · 这是一个纯静态的隐私友好网站</p>
+        <p>© 2023 心灵港湾 · 这是一个隐私友好的疗愈小站</p>
     </footer>
 </div>
 
 <script>
-    // --- 数据：暖心话语 (丰富的内容) ---
+    // --- 数据：93 条暖心话语 ---
     const quotes = [
         { text: "在这个嘈杂的世界里，你的存在本身就是一种美好。", author: "佚名" },
         { text: "没关系，你可以不用总是那么坚强。", author: "心理学寄语" },
-        { text: "凡是过往，皆为序章。无论发生什么，都要相信自己有重启的能力。", author: "莎士比亚 (寓意引导)" },
+        { text: "凡是过往，皆为序章。无论发生什么，都要相信自己有重启的能力。", author: "灵魂独白" },
         { text: "心理健康不是没有问题，而是拥有应对问题的能力。", author: "佚名" },
         { text: "你不需要变得完美，你只需要变得真实。", author: "卡尔·罗杰斯" },
         { text: "每个人都是一本书，不要因为错过了一章，就全盘否定整本书。", author: "佚名" },
         { text: "接纳自己，是疗愈的开始。", author: "佚名" },
         { text: "慢慢来，比较快。给时间一点时间。", author: "生活哲学" },
         { text: "即使在最黑暗的夜晚，星星依然闪烁。", author: "佚名" },
-        { text: "你值得被温柔以待，首先请你温柔对待自己。", author: "灵魂独白" }
+        { text: "你值得被温柔以待，首先请你温柔对待自己。", author: "灵魂独白" },
+        { text: "你不仅是问题的拥有者，更是答案的持有者。", author: "佚名" },
+        { text: "每一个不曾起舞的日子，都是对生命的辜负。", author: "尼采 (寓意引导)" },
+        { text: "焦虑是自由的眩晕。", author: "克尔凯郭尔" },
+        { text: "你生命中唯一的束缚，就是你对自己的限制。", author: "佚名" },
+        { text: "世界以痛吻我，要我报之以歌。", author: "泰戈尔" },
+        { text: "你的内心，藏着一个不曾向任何人敞开的港湾。", author: "佚名" },
+        { text: "所有的迷茫，最后都会变成坚定的力量。", author: "佚名" },
+        { text: "真正的勇敢，是当你依然感到恐惧时，还能向前迈进。", author: "佚名" },
+        { text: "你不必满足别人的期待，你只需为自己而活。", author: "灵魂独白" },
+        { text: "爱自己，是一生浪漫的开始。", author: "王尔德" },
+        { text: "即使世界一片灰暗，你的眼里依然有星星。", author: "佚名" },
+        { text: "所有的相遇，都是久别重逢。遇见更好的自己。", author: "佚名" },
+        { text: "接纳自己最深沉的悲伤，你才能拥有最深沉的喜悦。", author: "佚名" },
+        { text: "你不必变得像别人，你只需变得越来越像你。", author: "卡尔·荣格" },
+        { text: "真正的心理韧性，是摔倒后依然有爬起来的力量。", author: "佚名" },
+        { text: "允许自己悲伤，允许自己哭泣，那也是力量的一部分。", author: "佚名" },
+        { text: "你的生命，是一份不曾被拆开的礼物。", author: "佚名" },
+        { text: "你可以慢慢来，不必每天都过得有意义。", author: "生活哲学" },
+        { text: "你的过去不能定义你的未来。", author: "佚名" },
+        { text: "在这个充满不确定的世界里，你是唯一的确定。", author: "佚名" },
+        { text: "你可以有情绪，但不要让情绪控制你。", author: "佚名" },
+        { text: "所有的痛苦，都是通往成长的旅途。", author: "佚名" },
+        { text: "你拥有的，比你想象的要多。", author: "佚名" },
+        { text: "你不必完美，你只需要被看到、被听到。", author: "卡尔·罗杰斯" },
+        { text: "生命就像一条河，有时平缓，有时湍急。接受它的节奏。", author: "佚名" },
+        { text: "你是一个不可复制的存在。", author: "佚名" },
+        { text: "接纳现在的自己，因为你是通往更好自己的唯一路径。", author: "佚名" },
+        { text: "即使生活不尽如人意，你依然可以创造属于自己的温暖角落。", author: "生活哲学" },
+        { text: "每一个选择，都在塑造你的命运。", author: "佚名" },
+        { text: "真正的自由，是你可以选择如何应对生活中的不确定。", author: "佚名" },
+        { text: "你不必一直追赶，允许自己休息，也是一种前进方式。", author: "佚名" },
+        { text: "你的身体是心灵的殿堂，善待它。", author: "佚名" },
+        { text: "每一个困难，都蕴含着发展的机会。", author: "佚名" },
+        { text: "你不是一个人在战斗。", author: "佚名" },
+        { text: "保持一颗童心，你能在这个复杂的社会活得更简单。", author: "佚名" },
+        { text: "你不必让每一个人都喜欢你。", author: "佚名" },
+        { text: "爱是最终的答案。", author: "佚名" },
+        { text: "即使只有一点点希望，也要紧紧抓住。", author: "佚名" },
+        { text: "你的生命，是一首未完的诗。", author: "佚名" },
+        { text: "在无常的生活中，寻找内心的恒定。", author: "佚名" },
+        { text: "你不必追求别人所追求的一切，找到适合自己的就好。", author: "佚名" },
+        { text: "感恩你所拥有的一切，哪怕只是微不足道的小事。", null },
+        { text: "每一个清晨，都是新的开始。", author: "佚名" },
+        { text: "真正的成熟，是你能接纳世界的多元和不完美。", null },
+        { text: "你不必一直成功，允许自己失败，也是一种智慧。", author: "佚名" },
+        { text: "心灵可以受伤，但也拥有愈合的能力。", author: "佚名" },
+        { text: "你的生命是一场冒险，去体验它的每一个方面。", author: "佚名" },
+        { text: "保持好奇，你能在这个世界发现更多美好。", null },
+        { text: "你不必孤独地面对一切。", author: "佚名" },
+        { text: "接纳自己的软弱，它是你内心真实的存在。", author: "佚名" },
+        { text: "每一个笑容，都能温暖一段时光。", author: "佚名" },
+        { text: "你的过去，是你成长的养分。", author: "佚名" },
+        { text: "在繁忙的生活中，给自己留一点时间静心。", null },
+        { text: "你不必知道所有的答案，允许自己在探索中成长。", author: "佚名" },
+        { text: "保持一颗慈悲的心，对待自己和他人。", null },
+        { text: "你不必拥有最完美的人生，只要拥有你的人生。", author: "佚名" },
+        { text: "每一个瞬间，都值得珍惜。", author: "佚名" },
+        { text: "你的生命，是一份不曾被定义的力量。", author: "佚名" },
+        { text: "即使道路艰难，坚持下去，总能看到希望。", author: "佚名" },
+        { text: "保持谦卑，在这个广阔的世界里，我们只是沧海一粟。", author: "佚名" },
+        { text: "你拥有疗愈自己的能量。", author: "佚名" },
+        { text: "你不必满足别人的完美标准。", author: "佚名" },
+        { text: "每一个结束，都是新的开始。", author: "佚名" },
+        { text: "在繁忙的生活中，寻找内心的宁静点。", author: "佚名" },
+        { text: "真正的幸福，来自于内心的充实和满足。", author: "佚名" },
+        { text: "爱，是连接每一个生命的桥梁。", author: "佚名" },
+        { text: "你不必变得像别人，你只需变得越来越像你。", author: "佚名" },
+        { text: "保持一颗宽容的心，接纳生活的不公和遗憾。", author: "佚名" },
+        { text: "真正的勇气，是在平凡的生活中依然追求美好。", author: "佚名" },
+        { text: "每一个不曾被定义的时刻，都是你重新出发的机会。", null },
+        { text: "你是一道光，能点亮自己和周围的世界。", author: "佚名" },
+        { text: "即使逆境重重，依然要有追求梦想的勇气。", author: "佚名" },
+        { text: "在喧嚣的生活中，寻找内心的恒定节奏。", null },
+        { text: "真正的智慧，是你能接纳无常和变化。", author: "佚名" },
+        { text: "你不必孤独前行，我们在这里陪你。", author: "心灵港湾" },
+        { text: "爱自己，是一生浪漫的开始。", null },
+        { text: "每一个笑容，都能传递希望和力量。", author: "佚名" },
+        { text: "心灵是可以愈合的。", author: "佚名" },
+        { text: "你不必追求虚幻的完美，真实活着就好。", null },
+        { text: "真正的平静，不是没有烦恼，而是懂得如何应对烦恼。", author: "佚名" },
+        { text: "爱，是最终的港湾。", author: "佚名" },
+        { text: "生命就像一张白纸，每一个瞬间都在填色。", null },
+        { text: "你的生命是一份独特的艺术品。", author: "佚名" }
     ];
 
     // --- 功能 1: 随机显示心语 ---
@@ -331,7 +456,6 @@
         const textElement = document.getElementById('quote-text');
         const authorElement = document.getElementById('quote-author');
         
-        // 简单的淡出效果
         textElement.style.opacity = 0;
         authorElement.style.opacity = 0;
 
@@ -339,19 +463,17 @@
             const randomIndex = Math.floor(Math.random() * quotes.length);
             const quote = quotes[randomIndex];
             textElement.innerText = `“${quote.text}”`;
-            authorElement.innerText = `—— ${quote.author}`;
+            authorElement.innerText = quote.author ? `—— ${quote.author}` : "—— 佚名";
             
-            // 淡入
-            textElement.style.transition = 'opacity 0.5s';
-            authorElement.style.transition = 'opacity 0.5s';
             textElement.style.opacity = 1;
             authorElement.style.opacity = 1;
         }, 300);
     }
 
-    // --- 功能 2: 呼吸冥想逻辑 ---
+    // --- 功能 2: 完整 4-7-8 呼吸空间逻辑 ---
     let isBreathing = false;
-    let breatheInterval;
+    let currentBreathePhase = null;
+    let bIntervalId = null;
 
     function toggleBreathing() {
         const btn = document.getElementById('breathe-btn');
@@ -361,66 +483,83 @@
         if (!isBreathing) {
             isBreathing = true;
             btn.innerText = "停止";
-            // 启动动画 (总时长 19秒: 4s吸, 7s屏, 8s呼)
-            circle.style.animation = "breathe 19s infinite linear";
-            
-            // 同步文字引导
-            const runBreatheCycle = () => {
-                if (!isBreathing) return;
-                text.innerText = "吸气... (4秒)";
-                text.style.color = "#a7bbc7"; // 柔蓝
-                
-                setTimeout(() => {
-                    if (!isBreathing) return;
-                    text.innerText = "屏住呼吸... (7秒)";
-                    text.style.color = "#f5d1c3"; // 柔粉
-                }, 4000);
-
-                setTimeout(() => {
-                    if (!isBreathing) return;
-                    text.innerText = "呼气... (8秒)";
-                    text.style.color = "#bbb"; 
-                }, 11000);
-            };
-
-            runBreatheCycle();
-            breatheInterval = setInterval(runBreatheCycle, 19000);
-
+            currentBreathePhase = 0; // 0: inhale, 1: hold, 2: exhale
+            runBreathingCycle(circle, text);
         } else {
+            // 停止
             isBreathing = false;
-            btn.innerText = "重新开始";
-            circle.style.animation = "none";
+            btn.innerText = "开始";
             text.innerText = "准备好了吗？";
             text.style.color = var(--primary-color);
-            clearInterval(breatheInterval);
+            clearBreatheState(circle);
         }
+    }
+
+    // 核心循环控制
+    function runBreathingCycle(circle, text) {
+        if (!isBreathing) return;
+
+        let duration;
+        let nextPhase;
+
+        // 根据阶段设置文本和动画
+        switch (currentBreathePhase) {
+            case 0: // 吸气 (4s)
+                text.innerText = "吸气... (4秒)";
+                text.style.color = "#a7bbc7"; // 柔蓝
+                circle.classList.add('inhale');
+                duration = 4000;
+                nextPhase = 1;
+                break;
+            case 1: // 屏息 (7s)
+                text.innerText = "屏住呼吸... (7秒)";
+                text.style.color = "#f5d1c3"; // 柔粉
+                circle.classList.remove('inhale');
+                circle.classList.add('hold');
+                duration = 7000;
+                nextPhase = 2;
+                break;
+            case 2: // 呼气 (8s)
+                text.innerText = "呼气... (8秒)";
+                text.style.color = "#bbb"; 
+                circle.classList.remove('hold');
+                circle.classList.add('exhale');
+                duration = 8000;
+                nextPhase = 0;
+                break;
+        }
+
+        // 设置下一个阶段的定时器
+        bIntervalId = setTimeout(() => {
+            if (!isBreathing) return;
+            currentBreathePhase = nextPhase;
+            runBreathingCycle(circle, text); // 递归调用
+        }, duration);
+    }
+
+    function clearBreatheState(circle) {
+        clearTimeout(bIntervalId);
+        circle.classList.remove('inhale', 'hold', 'exhale');
+        circle.style.transform = 'scale(1)'; // 重置大小
     }
 
     // --- 功能 3: 本地时光相册逻辑 (LocalStorage) ---
     const photoInput = document.getElementById('photo-input');
     const galleryGrid = document.getElementById('gallery-grid');
 
-    // 页面加载时加载已存照片
-    document.addEventListener('DOMContentLoaded', () => {
-        displayRandomQuote();
-        loadLocalPhotos();
-    });
-
     photoInput.addEventListener('change', function(e) {
         const file = e.target.files[0];
         if (!file) return;
 
-        // 限制文件大小，防止 LocalStorage 溢出 (建议 < 2MB)
+        // 限制文件大小，建议 < 2MB
         if (file.size > 2 * 1024 * 1024) {
-            alert("为了保证浏览器运行流畅，请上传小于 2MB 的照片。如果您需要存放大量高  照片，建议使用专门的云存储服务。");
+            alert("为了保证浏览器运行流畅，请上传小于 2MB 的照片。您可以尝试使用压缩后的照片。");
             return;
         }
 
         const reader = new FileReader();
         reader.onload = function(event) {
             const base64Image = event.target.result;
-            
-            // 提示用户输入一句话
             const note = prompt("为这张照片写下一句暖心的话吧 (可选):") || "美好瞬间";
             
             savePhotoToLocal(base64Image, note);
@@ -431,21 +570,19 @@
 
     function savePhotoToLocal(base64Data, note) {
         let photos = JSON.parse(localStorage.getItem('my_warm_photos') || '[]');
-        // 将新照片放在最前面
         photos.unshift({ id: Date.now(), data: base64Data, note: note });
         
         try {
             localStorage.setItem('my_warm_photos', JSON.stringify(photos));
         } catch (e) {
             alert("浏览器存储空间已满（通常为5MB），无法添加更多照片。请尝试删除旧照片。");
-            // 移除刚才添加的
             photos.shift();
         }
     }
 
     function loadLocalPhotos() {
         const photos = JSON.parse(localStorage.getItem('my_warm_photos') || '[]');
-        galleryGrid.innerHTML = ''; // 清空当前显示
+        galleryGrid.innerHTML = ''; 
 
         if (photos.length === 0) {
             galleryGrid.innerHTML = '<p style="grid-column: 1/-1; text-align:center; color:#ccc; padding:40px 0;">这里还空空的，上传第一张温暖的照片吧。</p>';
@@ -471,6 +608,12 @@
         localStorage.setItem('my_warm_photos', JSON.stringify(photos));
         loadLocalPhotos();
     }
+
+    // --- 页面初始加载 ---
+    document.addEventListener('DOMContentLoaded', () => {
+        displayRandomQuote(); // 显示第一句暖心话
+        loadLocalPhotos(); // 加载本地照片
+    });
 </script>
 
 </body>
