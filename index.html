@@ -22,11 +22,31 @@
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { background-color: var(--bg); color: var(--text); font-family: var(--font-main); line-height: 1.8; transition: var(--transition-soft); overflow-x: hidden; }
         
+        /* 基础动态背景 */
         .bg-animation { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1; pointer-events: none; overflow: hidden; opacity: 0.4; }
         .orb { position: absolute; border-radius: 50%; filter: blur(60px); animation: floatOrb 20s infinite ease-in-out alternate; }
         .orb-1 { width: 300px; height: 300px; background: var(--primary); top: -10%; left: -10%; }
         .orb-2 { width: 400px; height: 400px; background: var(--accent); bottom: -10%; right: -10%; animation-delay: -5s; }
         @keyframes floatOrb { 0% { transform: translate(0, 0) scale(1); } 100% { transform: translate(100px, 50px) scale(1.2); } }
+
+        /* 白噪音特效背景 */
+        .noise-fx { position: fixed; inset: 0; pointer-events: none; z-index: -1; opacity: 0; transition: opacity 1.5s ease; overflow: hidden; }
+        .noise-fx.active { opacity: 1; }
+        /* 雨声: 柔和雨丝斜向下落 */
+        #fx-rain { background: repeating-linear-gradient(15deg, transparent, transparent 50px, rgba(184, 198, 219, 0.15) 50px, rgba(184, 198, 219, 0.15) 52px); background-size: 120px 120px; animation: rainFall 2s linear infinite; }
+        @keyframes rainFall { 0% { background-position: 0 0; } 100% { background-position: 120px 120px; } }
+        /* 森林鸟鸣: 边缘树叶状绿色光晕摇曳 */
+        #fx-forest { background: radial-gradient(circle at 10% 20%, rgba(132, 169, 140, 0.15) 0%, transparent 40%), radial-gradient(circle at 90% 80%, rgba(132, 169, 140, 0.15) 0%, transparent 40%); animation: forestSway 8s ease-in-out infinite alternate; }
+        @keyframes forestSway { 0% { transform: scale(1) rotate(-2deg); } 100% { transform: scale(1.1) rotate(2deg); } }
+        /* 溪流: 底部水波纹浮动 */
+        #fx-stream { background: radial-gradient(ellipse at 50% 100%, rgba(108, 154, 171, 0.15) 0%, transparent 60%); animation: streamFlow 5s infinite alternate ease-in-out; }
+        @keyframes streamFlow { 0% { transform: scaleY(1) translateY(0); } 100% { transform: scaleY(1.1) translateY(-20px); } }
+        /* 轻柔钢琴: 中心光点呼吸膨胀 */
+        #fx-piano { background: radial-gradient(circle at 50% 50%, rgba(245, 209, 195, 0.12) 0%, transparent 50%); animation: pianoPulse 4s infinite alternate; }
+        @keyframes pianoPulse { 0% { opacity: 0.6; transform: scale(0.9); } 100% { opacity: 1; transform: scale(1.2); } }
+        /* 篝火: 底部暖色微弱火光闪烁 */
+        #fx-fire { background: radial-gradient(ellipse at 50% 110%, rgba(226, 149, 120, 0.2) 0%, transparent 50%); animation: fireFlicker 1.5s infinite alternate ease-in-out; }
+        @keyframes fireFlicker { 0% { opacity: 0.7; transform: translateY(0); } 100% { opacity: 1; transform: translateY(-10px); } }
 
         .container { max-width: 800px; margin: 0 auto; padding: 20px; padding-bottom: 80px; }
         header { text-align: center; padding: 50px 0 30px; position: relative; }
@@ -71,13 +91,13 @@
         .breath-circle { width: 40px; height: 40px; background: var(--primary); border-radius: 50%; transition: transform 0.5s, background 0.5s; }
 
         /* 白噪音 */
-        .noise-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 15px; margin-bottom: 20px; }
-        .noise-card { background: var(--bg); border-radius: 16px; padding: 15px 5px; text-align: center; cursor: pointer; transition: var(--transition-soft); }
-        .noise-card.playing { background: var(--primary); color: #fff; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-        .noise-icon { font-size: 1.5rem; margin-bottom: 5px; display: block; }
-        .noise-vol { width: 80%; height: 4px; -webkit-appearance: none; background: rgba(255,255,255,0.3); border-radius: 2px; margin-top: 10px; display: none; }
+        .noise-grid { display: flex; flex-wrap: wrap; gap: 15px; justify-content: center; margin-bottom: 20px; }
+        .noise-card { width: 90px; height: 110px; background: var(--bg); border-radius: 16px; padding: 15px 5px; text-align: center; cursor: pointer; transition: var(--transition-soft); display: flex; flex-direction: column; justify-content: center; align-items: center; }
+        .noise-card.playing { background: var(--primary); color: #fff; box-shadow: 0 4px 15px rgba(0,0,0,0.1); transform: translateY(-5px); }
+        .noise-icon { font-size: 1.8rem; margin-bottom: 5px; display: block; }
+        .noise-vol { width: 80%; height: 4px; -webkit-appearance: none; background: rgba(255,255,255,0.4); border-radius: 2px; margin-top: 10px; display: none; }
         .noise-card.playing .noise-vol { display: inline-block; }
-        .noise-vol::-webkit-slider-thumb { -webkit-appearance: none; width: 10px; height: 10px; border-radius: 50%; background: #fff; cursor: pointer; }
+        .noise-vol::-webkit-slider-thumb { -webkit-appearance: none; width: 12px; height: 12px; border-radius: 50%; background: #fff; cursor: pointer; }
 
         /* 站长预置音乐列表 */
         .music-list { display: flex; flex-direction: column; gap: 15px; }
@@ -122,7 +142,15 @@
 </head>
 <body>
 
-<div class="bg-animation"><div class="orb orb-1"></div><div class="orb orb-2"></div></div>
+<div class="bg-animation">
+    <div class="orb orb-1"></div><div class="orb orb-2"></div>
+</div>
+<div id="fx-rain" class="noise-fx"></div>
+<div id="fx-forest" class="noise-fx"></div>
+<div id="fx-stream" class="noise-fx"></div>
+<div id="fx-piano" class="noise-fx"></div>
+<div id="fx-fire" class="noise-fx"></div>
+
 <div id="toast-box"></div>
 
 <div class="modal-overlay" id="confirm-modal">
@@ -194,7 +222,6 @@
                     <div class="music-artist">点击播放</div>
                 </div>
             </div>
-
             <div class="music-item" onclick="playRepoMusic('song2')">
                 <div class="music-icon" id="icon-song2">▶</div>
                 <div class="music-info">
@@ -202,7 +229,6 @@
                     <div class="music-artist">点击播放</div>
                 </div>
             </div>
-
             <div class="music-item" onclick="playRepoMusic('song3')">
                 <div class="music-icon" id="icon-song3">▶</div>
                 <div class="music-info">
@@ -211,7 +237,6 @@
                 </div>
             </div>
         </div>
-
         <audio id="repo-audio-player" onended="onRepoMusicEnded()"></audio>
     </section>
 
@@ -238,12 +263,9 @@
     </section>
 
     <section class="fade-in">
-        <h2 class="section-title">自然混音台</h2>
+        <h2 class="section-title">自然白噪音</h2>
         <div class="flex-center" style="margin-bottom: 20px;">
-            <button class="btn btn-outline" onclick="applyNoisePreset('sleep')">🌙 睡前</button>
-            <button class="btn btn-outline" onclick="applyNoisePreset('focus')">📖 专注</button>
-            <button class="btn btn-outline" onclick="applyNoisePreset('relax')">☕ 放松</button>
-            <button class="btn btn-outline" style="border-color: #ff7875; color: #ff7875;" onclick="stopAllNoise()">⏹ 停播</button>
+            <button class="btn btn-outline" style="border-color: #ff7875; color: #ff7875;" onclick="stopAllNoise()">⏹ 全部停止</button>
         </div>
         <div class="noise-grid" id="noise-grid"></div>
         <div id="audio-container" style="display:none;"></div>
@@ -298,56 +320,33 @@
     document.documentElement.setAttribute('data-theme', themes[curThemeIdx]);
     const cycleTheme = () => { curThemeIdx = (curThemeIdx + 1) % themes.length; const nt = themes[curThemeIdx]; document.documentElement.setAttribute('data-theme', nt); db.set('theme', nt); toast(`已切换主题`); };
 
-    /* 音乐播放逻辑 (站长预置版本) */
+    /* 音乐播放逻辑 */
     let currentRepoSong = null;
     const repoAudio = document.getElementById('repo-audio-player');
 
     function playRepoMusic(id) {
         const item = document.getElementById(`icon-${id}`).closest('.music-item');
-        
-        // 点击正在播放的同一首歌
         if (currentRepoSong === id) {
-            if (repoAudio.paused) {
-                repoAudio.play();
-                document.getElementById(`icon-${id}`).innerText = '⏸';
-                item.classList.add('playing');
-            } else {
-                repoAudio.pause();
-                document.getElementById(`icon-${id}`).innerText = '▶';
-                item.classList.remove('playing');
-            }
+            if (repoAudio.paused) { repoAudio.play(); document.getElementById(`icon-${id}`).innerText = '⏸'; item.classList.add('playing'); } 
+            else { repoAudio.pause(); document.getElementById(`icon-${id}`).innerText = '▶'; item.classList.remove('playing'); }
             return;
         }
-
-        // 点击不同的歌：先恢复之前的 UI 状态
         if (currentRepoSong) {
             const prevIcon = document.getElementById(`icon-${currentRepoSong}`);
-            if(prevIcon) {
-                prevIcon.innerText = '▶';
-                prevIcon.closest('.music-item').classList.remove('playing');
-            }
+            if(prevIcon) { prevIcon.innerText = '▶'; prevIcon.closest('.music-item').classList.remove('playing'); }
         }
-
-        // 播放新歌
         repoAudio.src = `${id}.mp3`;
-        repoAudio.play().catch(e => toast(`未找到文件，请在 GitHub 上传 ${id}.mp3`));
+        repoAudio.play().catch(e => toast(`未找到文件，请上传 ${id}.mp3`));
         currentRepoSong = id;
-        
-        document.getElementById(`icon-${id}`).innerText = '⏸';
-        item.classList.add('playing');
+        document.getElementById(`icon-${id}`).innerText = '⏸'; item.classList.add('playing');
     }
-
     function onRepoMusicEnded() {
         if (currentRepoSong) {
             const icon = document.getElementById(`icon-${currentRepoSong}`);
-            if(icon) {
-                icon.innerText = '▶';
-                icon.closest('.music-item').classList.remove('playing');
-            }
+            if(icon) { icon.innerText = '▶'; icon.closest('.music-item').classList.remove('playing'); }
             currentRepoSong = null;
         }
     }
-
 
     /* 心情打卡 */
     const moodDefs = [ {s: 1, i: '🌧️', l: '低落'}, {s: 2, i: '☁️', l: '疲惫'}, {s: 3, i: '⛅', l: '平静'}, {s: 4, i: '☀️', l: '开心'}, {s: 5, i: '🌈', l: '雀跃'} ];
@@ -380,15 +379,43 @@
     const toggleBreathing = () => { const btn = document.getElementById('breath-btn'), circle = document.getElementById('breath-circle'), text = document.getElementById('breath-text'); if(!bRun) { bRun = true; btn.innerText = "停止"; btn.style.background = "#ff7875"; runBreath(circle, text, 0); } else { bRun = false; btn.innerText = "开始呼吸"; btn.style.background = "var(--accent)"; clearTimeout(bTimer); circle.style.transform = "scale(1)"; text.innerText = "准备好了吗？"; } };
     const runBreath = (c, t, s) => { if(!bRun) return; const p = bModes[bMode][s]; t.innerText = p.t; c.style.transition = `transform ${p.d}ms linear`; c.style.transform = p.c; bTimer = setTimeout(() => runBreath(c, t, (s + 1) % bModes[bMode].length), p.d); };
 
-    /* 自然之声 */
-    const noiseDB = [{id:'rain', i:'🌧️', n:'雨声'},{id:'forest', i:'🌲', n:'森林'},{id:'cafe', i:'☕', n:'咖啡馆'}];
-    const initNoise = () => { const grid = document.getElementById('noise-grid'), ac = document.getElementById('audio-container'); noiseDB.forEach(n => { grid.innerHTML += `<div class="noise-card" id="card-${n.id}" onclick="toggleNoise('${n.id}')"><span class="noise-icon">${n.i}</span><div style="font-size:0.8rem;">${n.n}</div></div>`; ac.innerHTML += `<audio id="audio-${n.id}" loop src="${n.id}.mp3"></audio>`; }); };
-    const toggleNoise = id => { const a = document.getElementById(`audio-${id}`), c = document.getElementById(`card-${id}`); if(c.classList.contains('playing')) { a.pause(); c.classList.remove('playing'); } else { a.play().catch(()=>toast(`需在仓库放 ${id}.mp3`)); c.classList.add('playing'); } };
-    const stopAllNoise = () => { noiseDB.forEach(n => { document.getElementById(`audio-${n.id}`).pause(); document.getElementById(`card-${n.id}`).classList.remove('playing'); }); };
-    const applyNoisePreset = m => { stopAllNoise(); if(m==='sleep') toggleNoise('rain'); else toggleNoise('cafe'); };
+    /* 自然白噪音 */
+    const noiseDB = [
+        {id:'rain', i:'🌧️', n:'雨声'}, {id:'forest', i:'🌲', n:'森林鸟鸣'},
+        {id:'stream', i:'🌊', n:'溪流'}, {id:'piano', i:'🎹', n:'轻柔钢琴'},
+        {id:'fire', i:'🔥', n:'篝火'}
+    ];
+    const initNoise = () => { 
+        const grid = document.getElementById('noise-grid'), ac = document.getElementById('audio-container'); 
+        noiseDB.forEach(n => { 
+            grid.innerHTML += `<div class="noise-card" id="card-${n.id}" onclick="toggleNoise('${n.id}')">
+                <span class="noise-icon">${n.i}</span><div style="font-size:0.8rem;">${n.n}</div>
+                <input type="range" class="noise-vol" min="0" max="1" step="0.1" value="0.5" onclick="event.stopPropagation()" oninput="changeVol('${n.id}', this.value)">
+                </div>`; 
+            ac.innerHTML += `<audio id="audio-${n.id}" loop src="${n.id}.mp3"></audio>`; 
+        }); 
+    };
+    const toggleNoise = id => { 
+        const a = document.getElementById(`audio-${id}`), c = document.getElementById(`card-${id}`), fx = document.getElementById(`fx-${id}`);
+        if(c.classList.contains('playing')) { 
+            a.pause(); c.classList.remove('playing'); fx.classList.remove('active');
+        } else { 
+            a.volume = c.querySelector('.noise-vol').value;
+            a.play().catch(()=>toast(`需在仓库放 ${id}.mp3`)); 
+            c.classList.add('playing'); fx.classList.add('active');
+        } 
+    };
+    const changeVol = (id, val) => { document.getElementById(`audio-${id}`).volume = val; };
+    const stopAllNoise = () => { 
+        noiseDB.forEach(n => { 
+            document.getElementById(`audio-${n.id}`).pause(); 
+            document.getElementById(`card-${n.id}`).classList.remove('playing'); 
+            document.getElementById(`fx-${n.id}`).classList.remove('active');
+        }); 
+    };
 
     /* 关怀与日记 */
-    const renderCareList = () => { document.getElementById('care-list').innerHTML = db.get('care', [{id:1, t:"喝杯温水", d:false}]).map(i => `<div class="list-item" style="${i.d?'opacity:0.5; text-decoration:line-through;':''}"><label><input type="checkbox" ${i.d?'checked':''} onchange="toggleCare(${i.id})"> ${i.t}</label><span style="color:#ff7875;cursor:pointer;" onclick="delCare(${i.id})">✖</span></div>`).join(''); };
+    const renderCareList = () => { document.getElementById('care-list').innerHTML = db.get('care', [{id:1, t:"喝杯温水", d:false}]).map(i => `<div class="list-item" style="${i.d?'opacity:0.5; text-decoration:line-through;':''}"><label style="display:flex; align-items:center; gap:10px;"><input type="checkbox" ${i.d?'checked':''} onchange="toggleCare(${i.id})"> ${i.t}</label><span style="color:#ff7875;cursor:pointer;" onclick="delCare(${i.id})">✖</span></div>`).join(''); };
     const addCare = () => { const v = document.getElementById('new-care').value.trim(); if(!v) return; let l = db.get('care', []); l.push({id: Date.now(), t: v, d: false}); db.set('care', l); document.getElementById('new-care').value = ''; renderCareList(); };
     const toggleCare = id => { let l = db.get('care', []); const i = l.find(x => x.id === id); if(i) i.d = !i.d; db.set('care', l); renderCareList(); };
     const delCare = id => { db.set('care', db.get('care', []).filter(i => i.id !== id)); renderCareList(); };
