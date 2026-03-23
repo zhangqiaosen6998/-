@@ -3,656 +3,439 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>心灵港湾 - 你的温暖角落</title>
+    <title>心灵港湾 - 沉浸式情绪陪伴</title>
     <style>
-        /* --- 全局与主题变量 --- */
+        /* ================= 1. 主题与全局变量 ================= */
         :root {
-            --bg-color: #fdfaf5; 
-            --text-color: #5d5c5c; 
-            --primary-color: #b8c6db; 
-            --accent-color: #f5d1c3; 
-            --card-bg: #ffffff;
-            --shadow: 0 4px 15px rgba(0,0,0,0.05);
-            --border-radius: 20px;
             --toast-bg: rgba(255, 255, 255, 0.9);
             --transition-soft: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            --font-main: 'PingFang SC', 'Microsoft YaHei', 'Noto Sans SC', sans-serif;
+            --shadow: 0 8px 30px rgba(0,0,0,0.04);
+            --radius: 24px;
         }
-
-        [data-theme="dark"] {
-            --bg-color: #2d3035; 
-            --text-color: #e0dbd1; 
-            --primary-color: #8a9cb8; 
-            --accent-color: #d4b8a8; 
-            --card-bg: #3a3d42;
-            --shadow: 0 4px 15px rgba(0,0,0,0.2);
-            --toast-bg: rgba(58, 61, 66, 0.9);
-        }
+        [data-theme="light"] { --bg: #fdfaf5; --text: #5d5c5c; --primary: #b8c6db; --accent: #f5d1c3; --card: #ffffff; }
+        [data-theme="dark"] { --bg: #222428; --text: #e0dbd1; --primary: #6c7a9c; --accent: #b39b8d; --card: #2d3035; --toast-bg: rgba(45,48,53,0.9); --shadow: 0 8px 30px rgba(0,0,0,0.2); }
+        [data-theme="sunset"] { --bg: #f9f3ec; --text: #6b5244; --primary: #d4a373; --accent: #e29578; --card: #ffffff; }
+        [data-theme="forest"] { --bg: #f0f4f1; --text: #4a5d4e; --primary: #84a98c; --accent: #cad2c5; --card: #ffffff; }
+        [data-theme="deepsea"] { --bg: #f0f4f8; --text: #465775; --primary: #6c9aab; --accent: #9cb4b8; --card: #ffffff; }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { background-color: var(--bg); color: var(--text); font-family: var(--font-main); line-height: 1.8; transition: var(--transition-soft); overflow-x: hidden; }
         
-        body {
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            font-family: 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', sans-serif;
-            line-height: 1.9;
-            padding-bottom: 50px;
-            transition: background-color 0.5s ease, color 0.5s ease;
-            overflow-x: hidden;
-        }
+        /* 基础动态背景 */
+        .bg-animation { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1; pointer-events: none; overflow: hidden; opacity: 0.4; }
+        .orb { position: absolute; border-radius: 50%; filter: blur(60px); animation: floatOrb 20s infinite ease-in-out alternate; }
+        .orb-1 { width: 300px; height: 300px; background: var(--primary); top: -10%; left: -10%; }
+        .orb-2 { width: 400px; height: 400px; background: var(--accent); bottom: -10%; right: -10%; animation-delay: -5s; }
+        @keyframes floatOrb { 0% { transform: translate(0, 0) scale(1); } 100% { transform: translate(100px, 50px) scale(1.2); } }
 
-        /* --- 动画与交互基础 --- */
-        .fade-in-up {
-            opacity: 0;
-            transform: translateY(20px);
-            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
-        }
-        .fade-in-up.visible { opacity: 1; transform: translateY(0); }
+        /* 白噪音特效背景 */
+        .noise-fx { position: fixed; inset: 0; pointer-events: none; z-index: -1; opacity: 0; transition: opacity 1.5s ease; overflow: hidden; }
+        .noise-fx.active { opacity: 1; }
+        #fx-rain { background: repeating-linear-gradient(15deg, transparent, transparent 50px, rgba(184, 198, 219, 0.15) 50px, rgba(184, 198, 219, 0.15) 52px); background-size: 120px 120px; animation: rainFall 2s linear infinite; }
+        @keyframes rainFall { 0% { background-position: 0 0; } 100% { background-position: 120px 120px; } }
+        #fx-forest { background: radial-gradient(circle at 10% 20%, rgba(132, 169, 140, 0.15) 0%, transparent 40%), radial-gradient(circle at 90% 80%, rgba(132, 169, 140, 0.15) 0%, transparent 40%); animation: forestSway 8s ease-in-out infinite alternate; }
+        @keyframes forestSway { 0% { transform: scale(1) rotate(-2deg); } 100% { transform: scale(1.1) rotate(2deg); } }
+        #fx-stream { background: radial-gradient(ellipse at 50% 100%, rgba(108, 154, 171, 0.15) 0%, transparent 60%); animation: streamFlow 5s infinite alternate ease-in-out; }
+        @keyframes streamFlow { 0% { transform: scaleY(1) translateY(0); } 100% { transform: scaleY(1.1) translateY(-20px); } }
+        #fx-piano { background: radial-gradient(circle at 50% 50%, rgba(245, 209, 195, 0.12) 0%, transparent 50%); animation: pianoPulse 4s infinite alternate; }
+        @keyframes pianoPulse { 0% { opacity: 0.6; transform: scale(0.9); } 100% { opacity: 1; transform: scale(1.2); } }
+        #fx-fire { background: radial-gradient(ellipse at 50% 110%, rgba(226, 149, 120, 0.2) 0%, transparent 50%); animation: fireFlicker 1.5s infinite alternate ease-in-out; }
+        @keyframes fireFlicker { 0% { opacity: 0.7; transform: translateY(0); } 100% { opacity: 1; transform: translateY(-10px); } }
 
-        .btn-general {
-            background: transparent;
-            border: 1px solid var(--primary-color);
-            color: var(--primary-color);
-            padding: 8px 25px;
-            border-radius: 20px;
-            cursor: pointer;
-            transition: var(--transition-soft);
-            font-size: 0.9rem;
-            outline: none;
-        }
-        .btn-general:hover {
-            background: var(--primary-color);
-            color: #fff;
-            box-shadow: 0 4px 10px rgba(184, 198, 219, 0.4);
-        }
-        .btn-general:active { transform: scale(0.98); }
+        .container { max-width: 800px; margin: 0 auto; padding: 20px; padding-bottom: 80px; }
+        header { text-align: center; padding: 50px 0 30px; position: relative; }
+        header h1 { font-size: 2.2rem; font-weight: 400; letter-spacing: 2px; margin-bottom: 10px; }
+        .header-tools { position: absolute; right: 10px; top: 40px; display: flex; gap: 15px; }
+        .icon-btn { background: none; border: none; font-size: 1.2rem; cursor: pointer; color: var(--text); transition: var(--transition-soft); opacity: 0.7; }
+        .icon-btn:hover { opacity: 1; transform: scale(1.1); }
 
-        .btn-solid {
-            background: var(--accent-color);
-            border: none;
-            color: #fff;
-            padding: 10px 30px;
-            border-radius: 25px;
-            cursor: pointer;
-            transition: var(--transition-soft);
-            box-shadow: var(--shadow);
-        }
-        .btn-solid:hover { opacity: 0.9; box-shadow: 0 6px 15px rgba(245, 209, 195, 0.5); }
-        .btn-solid:active { transform: scale(0.98); }
+        section { background: var(--card); border-radius: var(--radius); padding: 30px; margin-bottom: 30px; box-shadow: var(--shadow); transition: var(--transition-soft); position: relative; overflow: hidden; }
+        section:hover { transform: translateY(-2px); box-shadow: 0 12px 40px rgba(0,0,0,0.06); }
+        .section-title { font-size: 1.2rem; font-weight: 500; text-align: center; margin-bottom: 25px; position: relative; z-index: 1; }
+        .section-title::after { content: ''; display: block; width: 40px; height: 3px; background: var(--accent); margin: 8px auto 0; border-radius: 2px; transition: width 0.3s; }
+        section:hover .section-title::after { width: 60px; }
 
-        /* --- 布局结构 --- */
-        .container { max-width: 800px; margin: 0 auto; padding: 20px; opacity: 0; animation: pageLoad 0.8s ease forwards; }
-        @keyframes pageLoad { to { opacity: 1; } }
+        .btn { border: 1px solid transparent; padding: 8px 20px; border-radius: 20px; cursor: pointer; font-size: 0.9rem; transition: var(--transition-soft); outline: none; background: transparent; }
+        .btn-outline { border-color: var(--primary); color: var(--primary); }
+        .btn-outline:hover, .btn-outline.active { background: var(--primary); color: var(--card); }
+        .btn-solid { background: var(--accent); color: #fff; box-shadow: 0 4px 15px rgba(0,0,0,0.1); padding: 10px 25px; }
+        .btn-solid:hover { opacity: 0.9; transform: translateY(-2px); }
+        .btn:active { transform: scale(0.95); }
 
-        header { text-align: center; padding: 40px 0; position: relative; }
-        header h1 { font-size: 2.2rem; font-weight: 300; letter-spacing: 2px; }
-        
-        .theme-toggle {
-            position: absolute; right: 10px; top: 40px;
-            background: none; border: none; font-size: 1.5rem; cursor: pointer;
-            color: var(--text-color); transition: var(--transition-soft);
-        }
-        .theme-toggle:hover { transform: rotate(15deg) scale(1.1); }
+        input, textarea, select { width: 100%; padding: 12px 15px; border: 1px solid var(--primary); border-radius: 12px; background: transparent; color: var(--text); font-family: inherit; outline: none; transition: 0.3s; }
+        input:focus, textarea:focus { box-shadow: 0 0 0 3px rgba(184, 198, 219, 0.2); }
 
-        section {
-            margin-bottom: 40px; background: var(--card-bg); padding: 30px;
-            border-radius: var(--border-radius); box-shadow: var(--shadow);
-            transition: var(--transition-soft);
-        }
+        .fade-in { opacity: 0; transform: translateY(20px); transition: 0.6s ease-out; }
+        .fade-in.visible { opacity: 1; transform: translateY(0); }
 
-        h2.section-title {
-            font-size: 1.2rem; color: var(--text-color); opacity: 0.8;
-            margin-bottom: 25px; font-weight: 400; text-align: center;
-        }
-        h2.section-title::after {
-            content: ''; display: block; width: 40px; height: 2px;
-            background: var(--accent-color); margin: 8px auto 0;
-            transition: width 0.3s;
-        }
-        section:hover h2.section-title::after { width: 60px; }
+        /* 心情打卡 */
+        .mood-grid { display: flex; justify-content: center; gap: 15px; margin-bottom: 20px; flex-wrap: wrap; }
+        .mood-item { width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; cursor: pointer; background: var(--bg); transition: var(--transition-soft); position: relative; }
+        .mood-item:hover, .mood-item.active { background: var(--accent); transform: scale(1.15); }
+        .mood-item::after { content: attr(data-label); position: absolute; bottom: -20px; font-size: 0.7rem; color: var(--text); opacity: 0; transition: 0.3s; white-space: nowrap; }
+        .mood-item:hover::after, .mood-item.active::after { opacity: 1; bottom: -25px; }
+        .chart-container { height: 120px; display: flex; align-items: flex-end; justify-content: space-between; gap: 4px; margin-top: 30px; padding-top: 20px; border-top: 1px dashed var(--primary); }
+        .chart-bar-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; position: relative; }
+        .chart-bar { width: 60%; background: var(--primary); border-radius: 4px 4px 0 0; opacity: 0.7; transition: height 1s ease; cursor: pointer; }
+        .chart-bar:hover { opacity: 1; background: var(--accent); }
+        .chart-label { font-size: 0.6rem; margin-top: 5px; color: #888; }
 
-        /* --- 自定义温暖弹窗 (Toast & Confirm) --- */
-        #toast-container {
-            position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
-            z-index: 1000; display: flex; flex-direction: column; gap: 10px;
-        }
-        .toast {
-            background: var(--toast-bg); color: var(--text-color);
-            padding: 12px 25px; border-radius: 30px; font-size: 0.9rem;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1); backdrop-filter: blur(5px);
-            animation: toastIn 0.4s ease, toastOut 0.4s ease 2.5s forwards;
-        }
-        @keyframes toastIn { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes toastOut { to { opacity: 0; transform: translateY(-20px); } }
+        /* 呼吸冥想 */
+        .breath-circle-wrap { width: 160px; height: 160px; background: var(--bg); border-radius: 50%; margin: 0 auto 20px; display: flex; justify-content: center; align-items: center; box-shadow: inset 0 0 20px rgba(0,0,0,0.02); }
+        .breath-circle { width: 40px; height: 40px; background: var(--primary); border-radius: 50%; transition: transform 0.5s, background 0.5s; }
 
-        #confirm-modal {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.3); backdrop-filter: blur(3px);
-            display: flex; justify-content: center; align-items: center;
-            z-index: 1001; opacity: 0; pointer-events: none; transition: opacity 0.3s;
-        }
-        #confirm-modal.active { opacity: 1; pointer-events: auto; }
-        .confirm-box {
-            background: var(--card-bg); padding: 30px; border-radius: 20px;
-            text-align: center; max-width: 300px; transform: scale(0.9); transition: transform 0.3s;
-        }
-        #confirm-modal.active .confirm-box { transform: scale(1); }
-        .confirm-btns { display: flex; gap: 15px; justify-content: center; margin-top: 20px; }
+        /* 白噪音 */
+        .noise-grid { display: flex; flex-wrap: wrap; gap: 15px; justify-content: center; margin-bottom: 20px; }
+        .noise-card { width: 90px; height: 110px; background: var(--bg); border-radius: 16px; padding: 15px 5px; text-align: center; cursor: pointer; transition: var(--transition-soft); display: flex; flex-direction: column; justify-content: center; align-items: center; }
+        .noise-card.playing { background: var(--primary); color: #fff; box-shadow: 0 4px 15px rgba(0,0,0,0.1); transform: translateY(-5px); }
+        .noise-icon { font-size: 1.8rem; margin-bottom: 5px; display: block; }
+        .noise-vol { width: 80%; height: 4px; -webkit-appearance: none; background: rgba(255,255,255,0.4); border-radius: 2px; margin-top: 10px; display: none; }
+        .noise-card.playing .noise-vol { display: inline-block; }
+        .noise-vol::-webkit-slider-thumb { -webkit-appearance: none; width: 12px; height: 12px; border-radius: 50%; background: #fff; cursor: pointer; }
 
-        /* --- 模块 0: 心情温度计 --- */
-        #mood-tracker { text-align: center; }
-        .thermometer { display: flex; justify-content: center; gap: 15px; margin-bottom: 20px; }
-        .mood-scale {
-            width: 40px; height: 40px; border-radius: 50%; display: flex;
-            align-items: center; justify-content: center; font-size: 1.2rem;
-            background: var(--bg-color); cursor: pointer; transition: var(--transition-soft);
-        }
-        .mood-scale:hover, .mood-scale.active { background: var(--accent-color); transform: scale(1.1); color: #fff; }
-        .trend-bar { height: 100px; display: flex; align-items: flex-end; justify-content: center; gap: 8px; margin-top: 20px; }
-        .trend-item { width: 20px; background: var(--primary-color); border-radius: 10px 10px 0 0; opacity: 0.6; transition: height 0.8s ease; }
+        /* 站长预置音乐列表 */
+        .music-list { display: flex; flex-direction: column; gap: 15px; }
+        .music-item { display: flex; align-items: center; gap: 15px; padding: 15px 20px; background: var(--bg); border-radius: 15px; cursor: pointer; transition: var(--transition-soft); }
+        .music-item:hover { transform: translateX(5px); box-shadow: var(--shadow); }
+        .music-item.playing { background: var(--primary); color: #fff; }
+        .music-item.playing .music-artist { color: rgba(255,255,255,0.8); }
+        .music-icon { width: 40px; height: 40px; border-radius: 50%; background: var(--card); display: flex; justify-content: center; align-items: center; color: var(--primary); font-size: 1.2rem; transition: var(--transition-soft); }
+        .music-item.playing .music-icon { color: var(--accent); transform: scale(1.1); }
+        .music-info { display: flex; flex-direction: column; }
+        .music-name { font-size: 1rem; font-weight: 500; }
+        .music-artist { font-size: 0.8rem; color: #888; transition: var(--transition-soft); }
 
-        /* --- 模块 1: 每日心语 --- */
-        #quote-container { text-align: center; min-height: 150px; display: flex; flex-direction: column; justify-content: center; align-items: center; }
-        .quote-anim { transition: opacity 0.5s ease, transform 0.5s ease; }
-        .quote-hidden { opacity: 0; transform: scale(0.95) translateY(10px); }
+        /* 瀑布流/列表 */
+        .list-wrap { display: flex; flex-direction: column; gap: 15px; margin-top: 20px; }
+        .list-item { background: var(--bg); padding: 15px; border-radius: 12px; display: flex; justify-content: space-between; align-items: flex-start; transition: 0.3s; }
+        .list-item:hover { transform: translateX(5px); }
 
-        /* --- 模块 2: 呼吸与冥想 --- */
-        .meditation-wrapper { display: flex; flex-wrap: wrap; gap: 30px; justify-content: center; }
-        .meditation-box { flex: 1; min-width: 250px; text-align: center; }
-        
-        .circle-outer {
-            width: 140px; height: 140px; background: var(--bg-color); border-radius: 50%;
-            display: flex; justify-content: center; align-items: center; margin: 0 auto 20px;
-            box-shadow: inset 0 0 20px rgba(0,0,0,0.02);
-        }
-        .circle-inner {
-            width: 40px; height: 40px; background: var(--primary-color); border-radius: 50%;
-            transition: transform 0.5s ease, background-color 0.5s ease;
-        }
-        .circle-inner.inhale { transform: scale(3.2); background: var(--primary-color); transition: transform 4s linear, background-color 4s; }
-        .circle-inner.hold { transform: scale(3.2); background: var(--accent-color); transition: background-color 1s; }
-        .circle-inner.exhale { transform: scale(1); background: var(--text-color); opacity: 0.5; transition: transform 8s linear, background-color 8s; }
+        /* 照片墙 */
+        .gallery-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 15px; margin-top: 20px; }
+        .photo-card { position: relative; border-radius: 12px; overflow: hidden; cursor: pointer; aspect-ratio: 1; }
+        .photo-card img { width: 100%; height: 100%; object-fit: cover; transition: 0.5s; }
+        .photo-card:hover img { transform: scale(1.05); }
+        .photo-mask { position: absolute; inset: 0; background: rgba(0,0,0,0.4); display: flex; flex-direction: column; justify-content: center; align-items: center; opacity: 0; transition: 0.3s; color: #fff; }
+        .photo-card:hover .photo-mask { opacity: 1; }
 
-        .progress-bg { width: 100%; height: 6px; background: var(--bg-color); border-radius: 3px; margin: 20px 0; overflow: hidden; }
-        .progress-bar { height: 100%; background: var(--accent-color); width: 0%; transition: width 1s linear; }
+        /* 弹窗与Modal */
+        #toast-box { position: fixed; top: 30px; left: 50%; transform: translateX(-50%); z-index: 9999; display: flex; flex-direction: column; gap: 10px; pointer-events: none; }
+        .toast { background: var(--toast-bg); color: var(--text); padding: 12px 25px; border-radius: 30px; font-size: 0.9rem; box-shadow: 0 4px 20px rgba(0,0,0,0.08); backdrop-filter: blur(10px); animation: slideDown 0.4s ease forwards, fadeOut 0.4s ease 2.5s forwards; }
+        @keyframes slideDown { from{opacity:0; transform:translateY(-20px);} to{opacity:1; transform:translateY(0);} }
+        @keyframes fadeOut { to{opacity:0; transform:translateY(-20px);} }
 
-        /* --- 模块 3: 心情日记 --- */
-        .diary-input-area { display: flex; flex-direction: column; gap: 15px; margin-bottom: 20px; }
-        .diary-textarea {
-            width: 100%; padding: 15px; border: 1px solid var(--primary-color);
-            border-radius: 15px; background: transparent; color: var(--text-color);
-            resize: none; outline: none; transition: var(--transition-soft);
-        }
-        .diary-textarea:focus { box-shadow: 0 0 10px rgba(184, 198, 219, 0.3); }
-        .diary-list { display: flex; flex-direction: column; gap: 15px; }
-        .diary-item {
-            background: var(--bg-color); padding: 15px; border-radius: 15px;
-            position: relative; animation: slideInUp 0.4s ease;
-        }
-        @keyframes slideInUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .diary-time { font-size: 0.8rem; color: var(--primary-color); margin-bottom: 5px; }
-        .diary-del { position: absolute; top: 15px; right: 15px; cursor: pointer; color: #ff7875; opacity: 0.6; }
-        .diary-del:hover { opacity: 1; }
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(5px); z-index: 1000; display: none; justify-content: center; align-items: center; opacity: 0; transition: 0.3s; }
+        .modal-overlay.active { display: flex; opacity: 1; }
+        .modal-content { background: var(--card); padding: 30px; border-radius: var(--radius); width: 90%; max-width: 400px; text-align: center; transform: scale(0.9); transition: 0.3s; max-height: 80vh; overflow-y: auto;}
+        .modal-overlay.active .modal-content { transform: scale(1); }
 
-        /* --- 模块 4: 白噪音 --- */
-        .noise-grid { display: flex; flex-wrap: wrap; gap: 15px; justify-content: center; }
-        .noise-item {
-            width: 80px; height: 80px; border-radius: 20px; background: var(--bg-color);
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            cursor: pointer; transition: var(--transition-soft); color: var(--text-color);
-        }
-        .noise-item.playing { background: var(--primary-color); color: #fff; transform: translateY(-5px); box-shadow: 0 5px 15px rgba(184, 198, 219, 0.5); }
-        .noise-item i { font-size: 1.5rem; font-style: normal; margin-bottom: 5px; }
-        .volume-control { margin-top: 20px; display: flex; align-items: center; justify-content: center; gap: 10px; }
-        input[type=range] { accent-color: var(--primary-color); }
-
-        /* --- 模块 5: 自我关怀清单 --- */
-        .care-list { list-style: none; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; }
-        .care-item {
-            display: flex; align-items: center; gap: 10px; cursor: pointer;
-            padding: 10px 15px; background: var(--bg-color); border-radius: 12px; transition: var(--transition-soft);
-        }
-        .care-item:hover { transform: translateX(5px); }
-        .care-item.done { opacity: 0.6; text-decoration: line-through; background: transparent; border: 1px dashed var(--primary-color); }
-        .care-checkbox { width: 18px; height: 18px; border: 2px solid var(--primary-color); border-radius: 50%; display: inline-block; transition: 0.3s; }
-        .care-item.done .care-checkbox { background: var(--primary-color); border-color: var(--primary-color); }
-        .add-care { display: flex; gap: 10px; margin-top: 20px; }
-        .add-care input { flex: 1; padding: 10px; border-radius: 20px; border: 1px solid var(--primary-color); background: transparent; color: var(--text-color); }
-
-        /* --- 模块 6: 时光相册 --- */
-        .file-input-wrapper { text-align: center; margin-bottom: 25px; }
-        #photo-input { display: none; }
-        #gallery-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 20px; }
-        .photo-item {
-            border-radius: 12px; overflow: hidden; position: relative;
-            box-shadow: var(--shadow); transition: var(--transition-soft);
-        }
-        .photo-item:hover { transform: translateY(-5px); box-shadow: 0 8px 25px rgba(245, 209, 195, 0.4); border-radius: 16px; }
-        .photo-item::after {
-            content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
-            background: linear-gradient(to bottom, rgba(245, 209, 195, 0.2), transparent);
-            opacity: 0; transition: 0.4s; pointer-events: none;
-        }
-        .photo-item:hover::after { opacity: 1; }
-        .photo-item img { width: 100%; height: 180px; object-fit: cover; display: block; }
-        .photo-note { padding: 12px; font-size: 0.85rem; text-align: center; background: var(--card-bg); }
-        .delete-btn {
-            position: absolute; top: 10px; right: 10px; background: var(--toast-bg);
-            border: none; border-radius: 50%; width: 26px; height: 26px; cursor: pointer;
-            color: #ff7875; opacity: 0; transition: 0.3s; z-index: 2;
-        }
-        .photo-item:hover .delete-btn { opacity: 1; }
-
-        .empty-state { text-align: center; color: #aaa; padding: 30px 0; font-size: 0.9rem; animation: pulse 2s infinite; }
-        @keyframes pulse { 0% { opacity: 0.6; } 50% { opacity: 1; } 100% { opacity: 0.6; } }
-
-        @media (max-width: 600px) {
-            header h1 { font-size: 1.8rem; }
-            .meditation-wrapper { flex-direction: column; }
-            #gallery-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
-        }
+        .tag { font-size: 0.7rem; padding: 2px 8px; border-radius: 10px; background: var(--primary); color: #fff; margin-right: 5px; }
+        .flex-between { display: flex; justify-content: space-between; align-items: center; }
+        .flex-center { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
     </style>
 </head>
 <body>
 
-<div id="toast-container"></div>
-<div id="confirm-modal">
-    <div class="confirm-box">
-        <p id="confirm-text">确定要执行此操作吗？</p>
-        <div class="confirm-btns">
-            <button class="btn-general" id="confirm-cancel">取消</button>
-            <button class="btn-solid" id="confirm-ok">确定</button>
+<div class="bg-animation"><div class="orb orb-1"></div><div class="orb orb-2"></div></div>
+<div id="fx-rain" class="noise-fx"></div>
+<div id="fx-forest" class="noise-fx"></div>
+<div id="fx-stream" class="noise-fx"></div>
+<div id="fx-piano" class="noise-fx"></div>
+<div id="fx-fire" class="noise-fx"></div>
+
+<div id="toast-box"></div>
+
+<div class="modal-overlay" id="confirm-modal">
+    <div class="modal-content">
+        <h3 id="confirm-title" style="margin-bottom: 15px;">确认操作</h3>
+        <p id="confirm-desc" style="font-size: 0.9rem; color: #888; margin-bottom: 25px;"></p>
+        <div class="flex-center">
+            <button class="btn btn-outline" onclick="closeModal('confirm-modal')">取消</button>
+            <button class="btn btn-solid" id="confirm-btn">确定</button>
         </div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="photo-modal" onclick="if(event.target===this) closeModal('photo-modal')">
+    <div class="modal-content" style="max-width: 800px; padding: 10px; background: transparent; box-shadow: none;">
+        <img id="preview-img" style="max-width: 100%; max-height: 80vh; border-radius: 12px; object-fit: contain;">
     </div>
 </div>
 
 <div class="container">
     <header>
-        <button class="theme-toggle" onclick="toggleTheme()" title="切换夜间模式">🌙</button>
         <h1>心灵港湾</h1>
-        <p>停下来，遇见更好的自己</p>
+        <p style="opacity: 0.8;">停下来，遇见更好的自己</p>
+        <div class="header-tools">
+            <button class="icon-btn" onclick="cycleTheme()" title="切换主题">🎨</button>
+            <button class="icon-btn" onclick="exportData()" title="备份数据">💾</button>
+            <button class="icon-btn" onclick="document.getElementById('import-file').click()" title="恢复数据">📂</button>
+            <input type="file" id="import-file" style="display:none" accept=".json" onchange="importData(event)">
+        </div>
     </header>
 
-    <section class="fade-in-up" id="mood-tracker">
-        <h2 class="section-title">今日心情温度</h2>
-        <div class="thermometer" id="mood-scales">
-            <div class="mood-scale" onclick="saveMood(1)" title="低落">🌧️</div>
-            <div class="mood-scale" onclick="saveMood(2)" title="疲惫">☁️</div>
-            <div class="mood-scale" onclick="saveMood(3)" title="平静">⛅</div>
-            <div class="mood-scale" onclick="saveMood(4)" title="开心">☀️</div>
-            <div class="mood-scale" onclick="saveMood(5)" title="充满能量">🌈</div>
+    <section class="fade-in">
+        <h2 class="section-title">今日心情</h2>
+        <div class="mood-grid" id="mood-buttons"></div>
+        <div id="mood-extra" style="display: none; margin-top: 20px;">
+            <input type="text" id="mood-note" placeholder="添加简短备注 (选填)..." style="margin-bottom: 10px;">
+            <div class="flex-center"><button class="btn btn-solid" onclick="saveMood()">记录此刻</button></div>
         </div>
-        <p id="mood-text" style="font-size: 0.85rem; color: #888;">记录此刻感受，允许一切发生</p>
-        <div class="trend-bar" id="mood-trend"></div>
+        <div class="chart-container" id="mood-chart"></div>
     </section>
 
-    <section class="fade-in-up" id="quotes">
-        <h2 class="section-title">每日心语</h2>
-        <div id="quote-container">
-            <p id="quote-text" class="quote-anim">加载中...</p>
-            <p id="quote-author" class="quote-anim"></p>
-            <button class="btn-general" onclick="displayRandomQuote()">换一句</button>
+    <section class="fade-in">
+        <h2 class="section-title">治愈心语</h2>
+        <div class="flex-center" style="margin-bottom: 20px;">
+            <button class="btn btn-outline active" onclick="changeQuoteCat('all', this)">全部</button>
+            <button class="btn btn-outline" onclick="changeQuoteCat('接纳', this)">接纳</button>
+            <button class="btn btn-outline" onclick="changeQuoteCat('鼓励', this)">鼓励</button>
+            <button class="btn btn-outline" onclick="changeQuoteCat('安抚', this)">安抚</button>
+        </div>
+        <div style="text-align: center; min-height: 100px; display: flex; align-items: center; justify-content: center; flex-direction: column;">
+            <p id="quote-text" style="font-size: 1.2rem; margin-bottom: 10px; transition: 0.3s;"></p>
+        </div>
+        <div class="flex-center" style="margin-top: 20px;">
+            <button class="btn btn-outline" onclick="favCurrentQuote()">⭐ 收藏</button>
+            <button class="btn btn-outline" onclick="renderQuote()">换一句</button>
         </div>
     </section>
 
-    <section class="fade-in-up" id="meditation">
-        <h2 class="section-title">内心空间</h2>
-        <div class="meditation-wrapper">
-            <div class="meditation-box">
-                <p style="margin-bottom: 15px; color: var(--primary-color);">4-7-8 呼吸法</p>
-                <div class="circle-outer"><div class="circle-inner" id="breathe-circle"></div></div>
-                <p id="breathe-text" style="height: 1.5rem;">准备好了吗？</p>
-                <button class="btn-general" id="breathe-btn" onclick="toggleBreathing()" style="margin-top: 10px;">开始呼吸</button>
-            </div>
-            <div class="meditation-box">
-                <p style="margin-bottom: 15px; color: var(--accent-color);">正念引导</p>
-                <div style="display: flex; gap: 10px; justify-content: center; margin-bottom: 15px;">
-                    <button class="btn-general" style="padding: 5px 15px;" onclick="startMeditation(3)">3分钟</button>
-                    <button class="btn-general" style="padding: 5px 15px;" onclick="startMeditation(5)">5分钟</button>
+    <section class="fade-in" id="favorite-music">
+        <h2 class="section-title">音乐疗愈</h2>
+        <p style="text-align: center; font-size: 0.85rem; color: #888; margin-bottom: 15px;">站长精选，点击即播</p>
+        
+        <div class="music-list">
+            <div class="music-item" onclick="playRepoMusic('song1')">
+                <div class="music-icon" id="icon-song1">▶</div>
+                <div class="music-info">
+                    <div class="music-name">治愈轻音乐 1</div>
+                    <div class="music-artist">点击播放</div>
                 </div>
-                <div class="progress-bg"><div class="progress-bar" id="med-progress"></div></div>
-                <p id="med-text" style="height: 3rem; font-size: 0.9rem; transition: opacity 1s;">选择时长，开始静心之旅...</p>
-                <button class="btn-general" id="med-stop-btn" onclick="stopMeditation()" style="display: none; margin-top: 10px; border-color: #ff7875; color: #ff7875;">轻轻结束</button>
+            </div>
+            <div class="music-item" onclick="playRepoMusic('song2')">
+                <div class="music-icon" id="icon-song2">▶</div>
+                <div class="music-info">
+                    <div class="music-name">治愈轻音乐 2</div>
+                    <div class="music-artist">点击播放</div>
+                </div>
+            </div>
+            <div class="music-item" onclick="playRepoMusic('song3')">
+                <div class="music-icon" id="icon-song3">▶</div>
+                <div class="music-info">
+                    <div class="music-name">治愈轻音乐 3</div>
+                    <div class="music-artist">点击播放</div>
+                </div>
             </div>
         </div>
+        <audio id="repo-audio-player" onended="onRepoMusicEnded()"></audio>
     </section>
 
-    <section class="fade-in-up" id="white-noise">
-        <h2 class="section-title">自然之声</h2>
-        <p style="text-align: center; font-size: 0.8rem; margin-bottom: 15px; color:#aaa;">* 请确保设备未静音</p>
-        <div class="noise-grid">
-            <div class="noise-item" onclick="toggleNoise('rain', this)"><i>🌧️</i>细雨</div>
-            <div class="noise-item" onclick="toggleNoise('forest', this)"><i>🌲</i>森林</div>
-            <div class="noise-item" onclick="toggleNoise('stream', this)"><i>🌊</i>溪流</div>
-            <div class="noise-item" onclick="toggleNoise('fire', this)"><i>🔥</i>篝火</div>
-            <div class="noise-item" onclick="toggleNoise('piano', this)"><i>🎹</i>轻琴</div>
+    <section class="fade-in" style="background: var(--accent); color: #fff;">
+        <h2 class="section-title" style="color: #fff;">情绪急救箱</h2>
+        <div class="flex-center">
+            <button class="btn" style="background: rgba(255,255,255,0.2); color:#fff;" onclick="showFirstAid('anxiety')">极度焦虑</button>
+            <button class="btn" style="background: rgba(255,255,255,0.2); color:#fff;" onclick="showFirstAid('sad')">深陷悲伤</button>
+            <button class="btn" style="background: rgba(255,255,255,0.2); color:#fff;" onclick="showFirstAid('anger')">愤怒失控</button>
         </div>
-        <div class="volume-control">
-            <span>🔈</span>
-            <input type="range" id="noise-volume" min="0" max="1" step="0.1" value="0.5" onchange="updateVolume(this.value)">
-            <span>🔊</span>
-        </div>
-        <audio id="audio-rain" loop src=""></audio>
-        <audio id="audio-forest" loop src=""></audio>
-        <audio id="audio-stream" loop src=""></audio>
-        <audio id="audio-fire" loop src=""></audio>
-        <audio id="audio-piano" loop src=""></audio>
+        <div id="first-aid-content" style="display: none; background: rgba(255,255,255,0.9); color: var(--text); padding: 20px; border-radius: 12px; margin-top: 20px;"></div>
     </section>
 
-    <section class="fade-in-up" id="self-care">
-        <h2 class="section-title">自我关怀清单</h2>
-        <ul class="care-list" id="care-ul"></ul>
-        <div class="add-care">
-            <input type="text" id="new-care-input" placeholder="添加一件爱自己的小事...">
-            <button class="btn-solid" onclick="addCareItem()">添加</button>
+    <section class="fade-in">
+        <h2 class="section-title">内心空间</h2>
+        <div class="flex-center" style="margin-bottom: 25px;">
+            <button class="btn btn-outline active" onclick="setBreathMode('478', this)">4-7-8 助眠</button>
+            <button class="btn btn-outline" onclick="setBreathMode('box', this)">4-4-4 箱式平静</button>
+            <button class="btn btn-outline" onclick="setBreathMode('quick', this)">快速深呼吸</button>
         </div>
+        <div class="breath-circle-wrap"><div class="breath-circle" id="breath-circle"></div></div>
+        <p id="breath-text" style="text-align: center; height: 1.5rem; margin-bottom: 15px; font-weight: 500;">准备好了吗？</p>
+        <div class="flex-center"><button class="btn btn-solid" id="breath-btn" onclick="toggleBreathing()">开始呼吸</button></div>
     </section>
 
-    <section class="fade-in-up" id="diary">
-        <h2 class="section-title">心情小记</h2>
-        <div class="diary-input-area">
-            <textarea class="diary-textarea" id="diary-content" rows="3" placeholder="写下此刻的思绪，烦恼会随字迹飘散..."></textarea>
-            <div style="text-align: right;">
-                <button class="btn-solid" onclick="saveDiary()">封存此刻</button>
+    <section class="fade-in">
+        <h2 class="section-title">自然白噪音</h2>
+        <div class="flex-center" style="margin-bottom: 20px;">
+            <button class="btn btn-outline" style="border-color: #ff7875; color: #ff7875;" onclick="stopAllNoise()">⏹ 全部停止</button>
+        </div>
+        <div class="noise-grid" id="noise-grid"></div>
+        <div id="audio-container" style="display:none;"></div>
+    </section>
+
+    <div style="display: flex; flex-wrap: wrap; gap: 30px;">
+        <section class="fade-in" style="flex: 1; min-width: 300px;">
+            <h2 class="section-title">关怀清单</h2>
+            <div class="list-wrap" id="care-list" style="margin-bottom: 15px;"></div>
+            <div class="flex-between">
+                <input type="text" id="new-care" placeholder="添加一件爱自己的小事...">
+                <button class="btn btn-outline" onclick="addCare()" style="margin-left: 10px;">添加</button>
             </div>
-        </div>
-        <div class="diary-list" id="diary-list-container"></div>
-    </section>
+        </section>
 
-    <section class="fade-in-up" id="gallery">
+        <section class="fade-in" style="flex: 1; min-width: 300px;">
+            <h2 class="section-title">情绪日记</h2>
+            <textarea id="diary-content" rows="3" placeholder="倾诉此刻的烦恼或喜悦..."></textarea>
+            <div class="flex-between" style="margin-top: 10px;">
+                <select id="diary-tag" class="btn btn-outline" style="padding: 5px 10px; width: auto;"><option>日常</option><option>宣泄</option></select>
+                <button class="btn btn-solid" onclick="saveDiary()">记录</button>
+            </div>
+            <div class="list-wrap" id="diary-list" style="max-height: 300px; overflow-y: auto;"></div>
+        </section>
+    </div>
+
+    <section class="fade-in">
         <h2 class="section-title">时光相册</h2>
-        <div class="file-input-wrapper">
-            <button class="btn-solid" onclick="document.getElementById('photo-input').click()">留住美好瞬间</button>
-            <input type="file" id="photo-input" accept="image/*">
+        <div style="text-align: center; margin-bottom: 15px;">
+            <button class="btn btn-solid" onclick="document.getElementById('photo-input').click()">上传照片</button>
+            <input type="file" id="photo-input" accept="image/*" style="display: none;" onchange="uploadPhoto(event)">
         </div>
-        <div id="gallery-grid"></div>
+        <div class="gallery-grid" id="photo-grid"></div>
     </section>
 
-    <footer>
-        <p>© 2026 心灵港湾 · 隐私安全，仅留存于你的设备</p>
-    </footer>
 </div>
 
 <script>
-    /* --- 核心工具：弹窗与 Observer --- */
-    function showWarmToast(msg) {
-        const container = document.getElementById('toast-container');
-        const toast = document.createElement('div');
-        toast.className = 'toast';
-        toast.innerText = msg;
-        container.appendChild(toast);
-        setTimeout(() => toast.remove(), 2900);
-    }
-
-    function showWarmConfirm(msg, onConfirm) {
-        const modal = document.getElementById('confirm-modal');
-        document.getElementById('confirm-text').innerText = msg;
-        modal.classList.add('active');
-        
-        const btnOk = document.getElementById('confirm-ok');
-        const btnCancel = document.getElementById('confirm-cancel');
-        
-        const cleanup = () => {
-            modal.classList.remove('active');
-            btnOk.removeEventListener('click', okHandler);
-            btnCancel.removeEventListener('click', cleanup);
-        };
-        const okHandler = () => { onConfirm(); cleanup(); };
-        
-        btnOk.addEventListener('click', okHandler);
-        btnCancel.addEventListener('click', cleanup);
-    }
-
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if(entry.isIntersecting) entry.target.classList.add('visible');
-        });
-    }, { threshold: 0.1 });
-    document.querySelectorAll('.fade-in-up').forEach(el => observer.observe(el));
-
-    /* --- 主题切换 --- */
-    function toggleTheme() {
-        const html = document.documentElement;
-        const current = html.getAttribute('data-theme');
-        const next = current === 'light' ? 'dark' : 'light';
-        html.setAttribute('data-theme', next);
-        localStorage.setItem('harbor_theme', next);
-        showWarmToast(next === 'dark' ? '已为你调暗灯光 🌙' : '阳光照进来了 ☀️');
-    }
-
-    /* --- 初始化 --- */
-    document.addEventListener('DOMContentLoaded', () => {
-        const savedTheme = localStorage.getItem('harbor_theme') || 'light';
-        document.documentElement.setAttribute('data-theme', savedTheme);
-        
-        displayRandomQuote();
-        renderMoodTrend();
-        renderCareList();
-        renderDiary();
-        loadLocalPhotos();
-    });
-
-    /* --- 0. 心情打卡 --- */
-    function saveMood(score) {
-        const today = new Date().toLocaleDateString();
-        let moods = JSON.parse(localStorage.getItem('harbor_moods') || '{}');
-        moods[today] = score;
-        localStorage.setItem('harbor_moods', JSON.stringify(moods));
-        
-        document.querySelectorAll('.mood-scale').forEach(el => el.classList.remove('active'));
-        event.currentTarget.classList.add('active');
-        showWarmToast('收到你的心情信号，无论好坏，都抱抱你 ✨');
-        renderMoodTrend();
-    }
+    /* ================= 工具与数据库 (更换了存储前缀 hb_v2_ ) ================= */
+    const toast = msg => { const box = document.getElementById('toast-box'), el = document.createElement('div'); el.className = 'toast'; el.innerText = msg; box.appendChild(el); setTimeout(() => el.remove(), 2900); };
+    let confirmCallback = null;
+    const showConfirm = (title, desc, cb) => { document.getElementById('confirm-title').innerText = title; document.getElementById('confirm-desc').innerText = desc; document.getElementById('confirm-modal').classList.add('active'); confirmCallback = cb; };
+    const closeModal = id => document.getElementById(id).classList.remove('active');
+    document.getElementById('confirm-btn').addEventListener('click', () => { if(confirmCallback) confirmCallback(); closeModal('confirm-modal'); });
     
-    function renderMoodTrend() {
-        const moods = JSON.parse(localStorage.getItem('harbor_moods') || '{}');
-        const container = document.getElementById('mood-trend');
-        container.innerHTML = '';
-        const dates = Object.keys(moods).slice(-7); // 近7天
-        if(dates.length === 0) {
-            container.innerHTML = '<span style="color:#aaa;font-size:0.8rem;">点亮上方图标开启记录</span>';
+    const observer = new IntersectionObserver(entries => { entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('visible'); }); }, {threshold: 0.1});
+    document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+    
+    // 【核心修复】：将键名彻底改为 hb_v2_ 强制绕过旧数据冲突
+    const db = { get: (k, d) => JSON.parse(localStorage.getItem(`hb_v2_${k}`)) || d, set: (k, v) => localStorage.setItem(`hb_v2_${k}`, JSON.stringify(v)) };
+
+    /* 主题 */
+    const themes = ['light', 'dark', 'sunset', 'forest', 'deepsea'];
+    let curThemeIdx = themes.indexOf(db.get('theme', 'light')); if(curThemeIdx === -1) curThemeIdx = 0;
+    document.documentElement.setAttribute('data-theme', themes[curThemeIdx]);
+    const cycleTheme = () => { curThemeIdx = (curThemeIdx + 1) % themes.length; const nt = themes[curThemeIdx]; document.documentElement.setAttribute('data-theme', nt); db.set('theme', nt); toast(`已切换主题`); };
+
+    /* 音乐播放逻辑 */
+    let currentRepoSong = null;
+    const repoAudio = document.getElementById('repo-audio-player');
+    function playRepoMusic(id) {
+        const item = document.getElementById(`icon-${id}`).closest('.music-item');
+        if (currentRepoSong === id) {
+            if (repoAudio.paused) { repoAudio.play(); document.getElementById(`icon-${id}`).innerText = '⏸'; item.classList.add('playing'); } 
+            else { repoAudio.pause(); document.getElementById(`icon-${id}`).innerText = '▶'; item.classList.remove('playing'); }
             return;
         }
-        dates.forEach(date => {
-            const h = moods[date] * 20; // 1-5分对应20-100px
-            const bar = document.createElement('div');
-            bar.className = 'trend-item';
-            bar.style.height = '0px';
-            bar.title = `${date}: ${moods[date]}分`;
-            container.appendChild(bar);
-            setTimeout(() => bar.style.height = h + 'px', 100);
-        });
+        if (currentRepoSong) {
+            const prevIcon = document.getElementById(`icon-${currentRepoSong}`);
+            if(prevIcon) { prevIcon.innerText = '▶'; prevIcon.closest('.music-item').classList.remove('playing'); }
+        }
+        repoAudio.src = `${id}.mp3`;
+        repoAudio.play().catch(e => toast(`未找到文件，请在 GitHub 根目录上传 ${id}.mp3`));
+        currentRepoSong = id;
+        document.getElementById(`icon-${id}`).innerText = '⏸'; item.classList.add('playing');
+    }
+    function onRepoMusicEnded() {
+        if (currentRepoSong) {
+            const icon = document.getElementById(`icon-${currentRepoSong}`);
+            if(icon) { icon.innerText = '▶'; icon.closest('.music-item').classList.remove('playing'); }
+            currentRepoSong = null;
+        }
     }
 
-    /* --- 1. 每日心语 --- */
-    const quotes = [
-        "在这个嘈杂的世界里，你的存在本身就是一种美好。",
-        "没关系，你可以不用总是那么坚强。",
-        "凡是过往，皆为序章。相信自己有重启的能力。",
-        "慢慢来，比较快。给时间一点时间。",
-        "你不需要变得完美，你只需要变得真实。",
-        "允许自己悲伤，允许自己哭泣，那也是力量的一部分。",
-        "爱自己，是一生浪漫的开始。"
+    /* 心情打卡 */
+    const moodDefs = [ {s: 1, i: '🌧️', l: '低落'}, {s: 2, i: '☁️', l: '疲惫'}, {s: 3, i: '⛅', l: '平静'}, {s: 4, i: '☀️', l: '开心'}, {s: 5, i: '🌈', l: '雀跃'} ];
+    let selectedMood = null;
+    const renderMoodBtns = () => { document.getElementById('mood-buttons').innerHTML = moodDefs.map(m => `<div class="mood-item" data-label="${m.l}" onclick="selectMood(${m.s}, this)">${m.i}</div>`).join(''); };
+    const selectMood = (s, el) => { document.querySelectorAll('.mood-item').forEach(e => e.classList.remove('active')); el.classList.add('active'); selectedMood = s; document.getElementById('mood-extra').style.display = 'block'; };
+    const saveMood = () => { if(!selectedMood) return; let moods = db.get('moods', {}); moods[new Date().toLocaleDateString()] = { score: selectedMood, note: document.getElementById('mood-note').value }; db.set('moods', moods); toast('记录成功'); document.getElementById('mood-extra').style.display = 'none'; renderChart(); };
+    const renderChart = () => {
+        const moods = db.get('moods', {}), dates = Object.keys(moods).slice(-7), wrap = document.getElementById('mood-chart');
+        if(!dates.length) { wrap.innerHTML = '<p style="color:#aaa; font-size:0.8rem; width:100%; text-align:center;">点亮今天的心情吧</p>'; return; }
+        wrap.innerHTML = dates.map(d => `<div class="chart-bar-wrap"><div style="font-size:0.8rem; margin-bottom:5px;">${moodDefs.find(x=>x.s===moods[d].score).i}</div><div class="chart-bar" style="height:0" data-h="${(moods[d].score/5)*100}px"></div><div class="chart-label">${d.split('/').slice(1).join('/')}</div></div>`).join('');
+        setTimeout(() => document.querySelectorAll('.chart-bar').forEach(b => b.style.height = b.getAttribute('data-h')), 100);
+    };
+
+    /* 治愈心语 */
+    const quoteDB = [{c:'接纳', t:"你不需要变得完美，你只需要变得真实。"},{c:'鼓励', t:"即使在最黑暗的夜晚，星星依然闪烁。"},{c:'安抚', t:"慢慢来，比较快。给时间一点时间。"}];
+    let curCat = 'all', curQuoteTxt = "";
+    const changeQuoteCat = (c, btn) => { document.querySelectorAll('#quotes .btn-outline').forEach(b => b.classList.remove('active')); btn.classList.add('active'); curCat = c; renderQuote(); };
+    const renderQuote = () => { let pool = curCat === 'all' ? quoteDB : quoteDB.filter(q=>q.c===curCat); const q = pool[Math.floor(Math.random()*pool.length)]; curQuoteTxt = q.t; const el = document.getElementById('quote-text'); el.style.opacity = 0; setTimeout(() => { el.innerText = `“${q.t}”`; el.style.opacity = 1; }, 300); };
+    const favCurrentQuote = () => { toast("已收藏至备忘录 ⭐"); };
+
+    /* 情绪急救 */
+    const firstAidDB = { anxiety: "1. 深呼吸 3 次。<br>2. 找到身边 5 件具体的物品念出名字。", sad: "1. 抱抱自己或毯子。<br>2. 喝杯温水，允许眼泪流下。", anger: "1. 离开现场去洗手间。<br>2. 用冷水洗脸降温。" };
+    const showFirstAid = t => { const box = document.getElementById('first-aid-content'); box.innerHTML = firstAidDB[t]; box.style.display = 'block'; };
+
+    /* 呼吸冥想 */
+    const bModes = { '478': [{t:"吸气...", d:4000, c:"scale(3)"}, {t:"屏息...", d:7000, c:"scale(3)"}, {t:"呼气...", d:8000, c:"scale(1)"}], 'box': [{t:"吸...", d:4000, c:"scale(3)"}, {t:"屏...", d:4000, c:"scale(3)"}, {t:"呼...", d:4000, c:"scale(1)"}, {t:"屏...", d:4000, c:"scale(1)"}], 'quick': [{t:"深吸...", d:3000, c:"scale(3)"}, {t:"力呼...", d:3000, c:"scale(1)"}] };
+    let bMode = '478', bRun = false, bTimer;
+    const setBreathMode = (m, btn) => { document.querySelectorAll('#meditation .btn-outline').forEach(b => b.classList.remove('active')); btn.classList.add('active'); bMode = m; if(bRun) { toggleBreathing(); toggleBreathing(); } };
+    const toggleBreathing = () => { const btn = document.getElementById('breath-btn'), circle = document.getElementById('breath-circle'), text = document.getElementById('breath-text'); if(!bRun) { bRun = true; btn.innerText = "停止"; btn.style.background = "#ff7875"; runBreath(circle, text, 0); } else { bRun = false; btn.innerText = "开始呼吸"; btn.style.background = "var(--accent)"; clearTimeout(bTimer); circle.style.transform = "scale(1)"; text.innerText = "准备好了吗？"; } };
+    const runBreath = (c, t, s) => { if(!bRun) return; const p = bModes[bMode][s]; t.innerText = p.t; c.style.transition = `transform ${p.d}ms linear`; c.style.transform = p.c; bTimer = setTimeout(() => runBreath(c, t, (s + 1) % bModes[bMode].length), p.d); };
+
+    /* 自然白噪音 */
+    const noiseDB = [
+        {id:'rain', i:'🌧️', n:'雨声'}, {id:'forest', i:'🌲', n:'森林鸟鸣'},
+        {id:'stream', i:'🌊', n:'溪流'}, {id:'piano', i:'🎹', n:'轻柔钢琴'},
+        {id:'fire', i:'🔥', n:'篝火'}
     ];
-    function displayRandomQuote() {
-        const textEl = document.getElementById('quote-text');
-        textEl.classList.add('quote-hidden');
-        setTimeout(() => {
-            textEl.innerText = `“${quotes[Math.floor(Math.random() * quotes.length)]}”`;
-            textEl.classList.remove('quote-hidden');
-        }, 500);
-    }
+    const initNoise = () => { 
+        const grid = document.getElementById('noise-grid'), ac = document.getElementById('audio-container'); 
+        noiseDB.forEach(n => { 
+            grid.innerHTML += `<div class="noise-card" id="card-${n.id}" onclick="toggleNoise('${n.id}')">
+                <span class="noise-icon">${n.i}</span><div style="font-size:0.8rem;">${n.n}</div>
+                <input type="range" class="noise-vol" min="0" max="1" step="0.1" value="0.5" onclick="event.stopPropagation()" oninput="changeVol('${n.id}', this.value)">
+                </div>`; 
+            ac.innerHTML += `<audio id="audio-${n.id}" loop src="${n.id}.mp3"></audio>`; 
+        }); 
+    };
+    const toggleNoise = id => { 
+        const a = document.getElementById(`audio-${id}`), c = document.getElementById(`card-${id}`), fx = document.getElementById(`fx-${id}`);
+        if(c.classList.contains('playing')) { 
+            a.pause(); c.classList.remove('playing'); fx.classList.remove('active');
+        } else { 
+            a.volume = c.querySelector('.noise-vol').value;
+            a.play().catch(()=>toast(`需在仓库放 ${id}.mp3`)); 
+            c.classList.add('playing'); fx.classList.add('active');
+        } 
+    };
+    const changeVol = (id, val) => { document.getElementById(`audio-${id}`).volume = val; };
+    const stopAllNoise = () => { 
+        noiseDB.forEach(n => { 
+            document.getElementById(`audio-${n.id}`).pause(); 
+            document.getElementById(`card-${n.id}`).classList.remove('playing'); 
+            document.getElementById(`fx-${n.id}`).classList.remove('active');
+        }); 
+    };
 
-    /* --- 2. 呼吸与冥想 --- */
-    let isBreathing = false, bIntervalId = null;
-    function toggleBreathing() {
-        const btn = document.getElementById('breathe-btn');
-        const circle = document.getElementById('breathe-circle');
-        const text = document.getElementById('breathe-text');
+    /* 关怀与日记 */
+    const renderCareList = () => { document.getElementById('care-list').innerHTML = db.get('care', [{id:1, t:"喝杯温水", d:false}]).map(i => `<div class="list-item" style="${i.d?'opacity:0.5; text-decoration:line-through;':''}"><label style="display:flex; align-items:center; gap:10px;"><input type="checkbox" ${i.d?'checked':''} onchange="toggleCare(${i.id})"> ${i.t}</label><span style="color:#ff7875;cursor:pointer;" onclick="delCare(${i.id})">✖</span></div>`).join(''); };
+    const addCare = () => { const v = document.getElementById('new-care').value.trim(); if(!v) return; let l = db.get('care', []); l.push({id: Date.now(), t: v, d: false}); db.set('care', l); document.getElementById('new-care').value = ''; renderCareList(); };
+    const toggleCare = id => { let l = db.get('care', []); const i = l.find(x => x.id === id); if(i) i.d = !i.d; db.set('care', l); renderCareList(); };
+    const delCare = id => { db.set('care', db.get('care', []).filter(i => i.id !== id)); renderCareList(); };
 
-        if (!isBreathing) {
-            isBreathing = true; btn.innerText = "停止呼吸";
-            runBreatheCycle(circle, text, 0);
-        } else {
-            isBreathing = false; btn.innerText = "开始呼吸";
-            text.innerText = "做得很好，休息一下"; text.style.color = "var(--primary-color)";
-            clearTimeout(bIntervalId);
-            circle.className = 'circle-inner'; 
+    const renderDiary = () => { document.getElementById('diary-list').innerHTML = db.get('diary', []).map(d => `<div class="list-item" style="flex-direction:column; gap:5px;"><div class="flex-between" style="width:100%;"><span class="tag">${d.tag}</span><span style="font-size:0.8rem; color:#888;">${d.time}</span></div><div>${d.content}</div><div style="text-align:right;width:100%;"><span style="color:#ff7875;cursor:pointer;font-size:0.8rem;" onclick="delDiary(${d.id})">删除</span></div></div>`).join(''); };
+    const saveDiary = () => { const c = document.getElementById('diary-content').value.trim(); if(!c) return; let d = db.get('diary', []); d.unshift({ id: Date.now(), tag: document.getElementById('diary-tag').value, time: new Date().toLocaleDateString(), content: c }); db.set('diary', d); document.getElementById('diary-content').value=''; renderDiary(); toast("已记录"); };
+    const delDiary = id => { showConfirm('删除日记', '确定要抹去这段记忆吗？', () => { db.set('diary', db.get('diary', []).filter(d => d.id !== id)); renderDiary(); }); };
+
+    /* 相册 */
+    const renderPhotos = () => { document.getElementById('photo-grid').innerHTML = db.get('photos', []).map(p => `<div class="photo-card" onclick="openPhoto('${p.data}')"><img src="${p.data}" loading="lazy"><div class="photo-mask"><button class="btn btn-solid" style="padding:4px 10px; font-size:0.7rem;" onclick="event.stopPropagation(); delPhoto(${p.id})">删除</button></div></div>`).join(''); };
+    const uploadPhoto = e => { const f = e.target.files[0]; if(!f) return; if(f.size > 2*1024*1024) return toast("图片需小于2MB"); const r = new FileReader(); r.onload = ev => { let p = db.get('photos', []); p.unshift({ id: Date.now(), data: ev.target.result }); try { db.set('photos', p); renderPhotos(); } catch(err) { toast('存储空间不足'); } }; r.readAsDataURL(f); };
+    const delPhoto = id => { showConfirm('删除照片', '确定删除？', () => { db.set('photos', db.get('photos', []).filter(p => p.id !== id)); renderPhotos(); }); };
+    const openPhoto = src => { document.getElementById('preview-img').src = src; document.getElementById('photo-modal').classList.add('active'); };
+
+    /* 备份恢复 */
+    const exportData = () => { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(localStorage)], {type:'application/json'})); a.download = '备份.json'; a.click(); toast("已备份"); };
+    const importData = e => { const f = e.target.files[0]; if(!f) return; const r = new FileReader(); r.onload = ev => { try { const d = JSON.parse(ev.target.result); Object.keys(d).forEach(k => { if(k.startsWith('hb_v2_')) localStorage.setItem(k, d[k]); }); toast("恢复成功，即将刷新"); setTimeout(()=>location.reload(), 1500); } catch(err){toast("格式错误");} }; r.readAsText(f); };
+
+    /* DOM加载后初始化 */
+    document.addEventListener('DOMContentLoaded', () => { 
+        try {
+            renderMoodBtns(); renderChart(); renderQuote(); initNoise(); renderCareList(); renderDiary(); renderPhotos();
+        } catch (err) {
+            console.error(err);
         }
-    }
-    function runBreatheCycle(circle, text, phase) {
-        if (!isBreathing) return;
-        const phases = [
-            { t: "深深吸气...", c: "inhale", d: 4000, color: "var(--primary-color)" },
-            { t: "感受气流，屏住...", c: "hold", d: 7000, color: "var(--accent-color)" },
-            { t: "缓缓呼出，放松...", c: "exhale", d: 8000, color: "var(--text-color)" }
-        ];
-        text.innerText = phases[phase].t; text.style.color = phases[phase].color;
-        circle.className = `circle-inner ${phases[phase].c}`;
-        bIntervalId = setTimeout(() => runBreatheCycle(circle, text, (phase + 1) % 3), phases[phase].d);
-    }
-
-    let medInterval, medTimeLeft, medTotal;
-    const medTexts = ["感受身体与座椅的接触...", "聆听周围细微的声音...", "思绪飘走也没关系，温柔地拉回来...", "吸气，接纳此刻...", "呼气，放下执念..."];
-    function startMeditation(minutes) {
-        document.getElementById('med-stop-btn').style.display = 'inline-block';
-        medTotal = minutes * 60; medTimeLeft = medTotal;
-        document.getElementById('med-progress').style.width = '0%';
-        clearInterval(medInterval);
-        showWarmToast('深呼吸，我们开始 🍃');
-        
-        let textIdx = 0;
-        medInterval = setInterval(() => {
-            medTimeLeft--;
-            document.getElementById('med-progress').style.width = `${((medTotal - medTimeLeft) / medTotal) * 100}%`;
-            
-            if (medTimeLeft % 15 === 0) { // 每15秒换句引导语
-                const textEl = document.getElementById('med-text');
-                textEl.style.opacity = 0;
-                setTimeout(() => { textEl.innerText = medTexts[textIdx % medTexts.length]; textEl.style.opacity = 1; textIdx++; }, 1000);
-            }
-            if (medTimeLeft <= 0) stopMeditation(true);
-        }, 1000);
-    }
-    function stopMeditation(finished = false) {
-        clearInterval(medInterval);
-        document.getElementById('med-progress').style.width = '0%';
-        document.getElementById('med-text').innerText = finished ? "冥想结束，愿你带着平静继续今天 ✨" : "已暂停，随时欢迎回来";
-        document.getElementById('med-stop-btn').style.display = 'none';
-    }
-
-    /* --- 3. 白噪音 --- */
-    let activeNoise = null;
-    function toggleNoise(type, el) {
-        const audio = document.getElementById(`audio-${type}`);
-        // 演示逻辑：由于没有真实音频链接，仅做UI反馈
-        if (activeNoise && activeNoise !== type) {
-            document.getElementById(`audio-${activeNoise}`).pause();
-            document.querySelector('.noise-item.playing')?.classList.remove('playing');
-        }
-        if (el.classList.contains('playing')) {
-            el.classList.remove('playing'); audio.pause(); activeNoise = null;
-        } else {
-            el.classList.add('playing'); 
-            activeNoise = type;
-            // audio.play().catch(e => console.log('无有效音频源'));
-            showWarmToast(`已开启${el.innerText}声音 (需配置真实音频文件)`);
-        }
-    }
-    function updateVolume(val) { document.querySelectorAll('audio').forEach(a => a.volume = val); }
-
-    /* --- 4. 自我关怀清单 --- */
-    const defaultCare = [{id:1, t:"喝一杯温水", d:false}, {id:2, t:"深呼吸5次", d:false}, {id:3, t:"放下手机发呆3分钟", d:false}];
-    function getCareList() { return JSON.parse(localStorage.getItem('harbor_care') || JSON.stringify(defaultCare)); }
-    function renderCareList() {
-        const list = getCareList();
-        const ul = document.getElementById('care-ul');
-        ul.innerHTML = list.map(item => `
-            <li class="care-item ${item.d ? 'done' : ''}" onclick="toggleCare(${item.id})">
-                <span class="care-checkbox"></span><span>${item.t}</span>
-            </li>`).join('');
-    }
-    function toggleCare(id) {
-        let list = getCareList();
-        const item = list.find(i => i.id === id);
-        if(item) { item.d = !item.d; localStorage.setItem('harbor_care', JSON.stringify(list)); renderCareList(); }
-    }
-    function addCareItem() {
-        const input = document.getElementById('new-care-input');
-        if(!input.value.trim()) return;
-        let list = getCareList();
-        list.push({id: Date.now(), t: input.value.trim(), d: false});
-        localStorage.setItem('harbor_care', JSON.stringify(list));
-        input.value = ''; renderCareList(); showWarmToast('已加入清单 📝');
-    }
-
-    /* --- 5. 心情日记 --- */
-    function saveDiary() {
-        const content = document.getElementById('diary-content').value.trim();
-        if(!content) { showWarmToast('写点什么再封存吧~'); return; }
-        let diaries = JSON.parse(localStorage.getItem('harbor_diary') || '[]');
-        diaries.unshift({ id: Date.now(), time: new Date().toLocaleString(), content });
-        localStorage.setItem('harbor_diary', JSON.stringify(diaries));
-        document.getElementById('diary-content').value = '';
-        renderDiary();
-        showWarmToast('思绪已温柔封存 🌸');
-    }
-    function renderDiary() {
-        const diaries = JSON.parse(localStorage.getItem('harbor_diary') || '[]');
-        const container = document.getElementById('diary-list-container');
-        if(diaries.length === 0) { container.innerHTML = '<div class="empty-state">还没有记录呢，写下第一条吧~</div>'; return; }
-        container.innerHTML = diaries.map(d => `
-            <div class="diary-item">
-                <div class="diary-time">${d.time}</div>
-                <div>${d.content}</div>
-                <span class="diary-del" onclick="deleteDiary(${d.id})">✖</span>
-            </div>`).join('');
-    }
-    function deleteDiary(id) {
-        showWarmConfirm("确定要抹去这段记忆吗？", () => {
-            let diaries = JSON.parse(localStorage.getItem('harbor_diary') || '[]');
-            localStorage.setItem('harbor_diary', JSON.stringify(diaries.filter(d => d.id !== id)));
-            renderDiary();
-        });
-    }
-
-    /* --- 6. 时光相册 --- */
-    document.getElementById('photo-input').addEventListener('change', function(e) {
-        const file = e.target.files[0];
-        if (!file) return;
-        if (file.size > 1.5 * 1024 * 1024) { showWarmToast("✨ 照片有点大哦，压缩一下会更流畅～"); return; }
-        
-        const reader = new FileReader();
-        reader.onload = function(event) {
-            let photos = JSON.parse(localStorage.getItem('harbor_photos') || '[]');
-            photos.unshift({ id: Date.now(), data: event.target.result, note: "美好瞬间" });
-            try {
-                localStorage.setItem('harbor_photos', JSON.stringify(photos));
-                loadLocalPhotos(); showWarmToast('留住这份美好 ✨');
-            } catch (e) { showWarmToast("浏览器空间满了，清理一下旧照片吧"); }
-        };
-        reader.readAsDataURL(file);
     });
-
-    function loadLocalPhotos() {
-        const photos = JSON.parse(localStorage.getItem('harbor_photos') || '[]');
-        const grid = document.getElementById('gallery-grid');
-        if (photos.length === 0) { grid.innerHTML = '<div class="empty-state" style="grid-column: 1/-1;">这里空空的，添加第一张温暖吧</div>'; return; }
-        grid.innerHTML = photos.map(p => `
-            <div class="photo-item">
-                <img src="${p.data}" alt="memory">
-                <button class="delete-btn" onclick="deletePhoto(${p.id})">✖</button>
-                <div class="photo-note">${p.note}</div>
-            </div>`).join('');
-    }
-    
-    function deletePhoto(id) {
-        showWarmConfirm("确定要删除这份回忆吗？删除后无法恢复哦～", () => {
-            let photos = JSON.parse(localStorage.getItem('harbor_photos') || '[]');
-            localStorage.setItem('harbor_photos', JSON.stringify(photos.filter(p => p.id !== id)));
-            loadLocalPhotos();
-        });
-    }
 </script>
 </body>
 </html>
