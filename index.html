@@ -22,11 +22,26 @@
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { background-color: var(--bg); color: var(--text); font-family: var(--font-main); line-height: 1.8; transition: var(--transition-soft); overflow-x: hidden; }
         
+        /* 基础动态背景 */
         .bg-animation { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1; pointer-events: none; overflow: hidden; opacity: 0.4; }
         .orb { position: absolute; border-radius: 50%; filter: blur(60px); animation: floatOrb 20s infinite ease-in-out alternate; }
         .orb-1 { width: 300px; height: 300px; background: var(--primary); top: -10%; left: -10%; }
         .orb-2 { width: 400px; height: 400px; background: var(--accent); bottom: -10%; right: -10%; animation-delay: -5s; }
         @keyframes floatOrb { 0% { transform: translate(0, 0) scale(1); } 100% { transform: translate(100px, 50px) scale(1.2); } }
+
+        /* 白噪音特效背景 */
+        .noise-fx { position: fixed; inset: 0; pointer-events: none; z-index: -1; opacity: 0; transition: opacity 1.5s ease; overflow: hidden; }
+        .noise-fx.active { opacity: 1; }
+        #fx-rain { background: repeating-linear-gradient(15deg, transparent, transparent 50px, rgba(184, 198, 219, 0.15) 50px, rgba(184, 198, 219, 0.15) 52px); background-size: 120px 120px; animation: rainFall 2s linear infinite; }
+        @keyframes rainFall { 0% { background-position: 0 0; } 100% { background-position: 120px 120px; } }
+        #fx-forest { background: radial-gradient(circle at 10% 20%, rgba(132, 169, 140, 0.15) 0%, transparent 40%), radial-gradient(circle at 90% 80%, rgba(132, 169, 140, 0.15) 0%, transparent 40%); animation: forestSway 8s ease-in-out infinite alternate; }
+        @keyframes forestSway { 0% { transform: scale(1) rotate(-2deg); } 100% { transform: scale(1.1) rotate(2deg); } }
+        #fx-stream { background: radial-gradient(ellipse at 50% 100%, rgba(108, 154, 171, 0.15) 0%, transparent 60%); animation: streamFlow 5s infinite alternate ease-in-out; }
+        @keyframes streamFlow { 0% { transform: scaleY(1) translateY(0); } 100% { transform: scaleY(1.1) translateY(-20px); } }
+        #fx-piano { background: radial-gradient(circle at 50% 50%, rgba(245, 209, 195, 0.12) 0%, transparent 50%); animation: pianoPulse 4s infinite alternate; }
+        @keyframes pianoPulse { 0% { opacity: 0.6; transform: scale(0.9); } 100% { opacity: 1; transform: scale(1.2); } }
+        #fx-fire { background: radial-gradient(ellipse at 50% 110%, rgba(226, 149, 120, 0.2) 0%, transparent 50%); animation: fireFlicker 1.5s infinite alternate ease-in-out; }
+        @keyframes fireFlicker { 0% { opacity: 0.7; transform: translateY(0); } 100% { opacity: 1; transform: translateY(-10px); } }
 
         .container { max-width: 800px; margin: 0 auto; padding: 20px; padding-bottom: 80px; }
         header { text-align: center; padding: 50px 0 30px; position: relative; }
@@ -70,7 +85,16 @@
         .breath-circle-wrap { width: 160px; height: 160px; background: var(--bg); border-radius: 50%; margin: 0 auto 20px; display: flex; justify-content: center; align-items: center; box-shadow: inset 0 0 20px rgba(0,0,0,0.02); }
         .breath-circle { width: 40px; height: 40px; background: var(--primary); border-radius: 50%; transition: transform 0.5s, background 0.5s; }
 
-        /* 音乐列表 */
+        /* 白噪音 */
+        .noise-grid { display: flex; flex-wrap: wrap; gap: 15px; justify-content: center; margin-bottom: 20px; }
+        .noise-card { width: 90px; height: 110px; background: var(--bg); border-radius: 16px; padding: 15px 5px; text-align: center; cursor: pointer; transition: var(--transition-soft); display: flex; flex-direction: column; justify-content: center; align-items: center; }
+        .noise-card.playing { background: var(--primary); color: #fff; box-shadow: 0 4px 15px rgba(0,0,0,0.1); transform: translateY(-5px); }
+        .noise-icon { font-size: 1.8rem; margin-bottom: 5px; display: block; }
+        .noise-vol { width: 80%; height: 4px; -webkit-appearance: none; background: rgba(255,255,255,0.4); border-radius: 2px; margin-top: 10px; display: none; }
+        .noise-card.playing .noise-vol { display: inline-block; }
+        .noise-vol::-webkit-slider-thumb { -webkit-appearance: none; width: 12px; height: 12px; border-radius: 50%; background: #fff; cursor: pointer; }
+
+        /* 站长预置音乐列表 */
         .music-list { display: flex; flex-direction: column; gap: 15px; }
         .music-item { display: flex; align-items: center; gap: 15px; padding: 15px 20px; background: var(--bg); border-radius: 15px; cursor: pointer; transition: var(--transition-soft); }
         .music-item:hover { transform: translateX(5px); box-shadow: var(--shadow); }
@@ -114,6 +138,12 @@
 <body>
 
 <div class="bg-animation"><div class="orb orb-1"></div><div class="orb orb-2"></div></div>
+<div id="fx-rain" class="noise-fx"></div>
+<div id="fx-forest" class="noise-fx"></div>
+<div id="fx-stream" class="noise-fx"></div>
+<div id="fx-piano" class="noise-fx"></div>
+<div id="fx-fire" class="noise-fx"></div>
+
 <div id="toast-box"></div>
 
 <div class="modal-overlay" id="confirm-modal">
@@ -224,6 +254,15 @@
         <div class="flex-center"><button class="btn btn-solid" id="breath-btn" onclick="toggleBreathing()">开始呼吸</button></div>
     </section>
 
+    <section class="fade-in">
+        <h2 class="section-title">自然白噪音</h2>
+        <div class="flex-center" style="margin-bottom: 20px;">
+            <button class="btn btn-outline" style="border-color: #ff7875; color: #ff7875;" onclick="stopAllNoise()">⏹ 全部停止</button>
+        </div>
+        <div class="noise-grid" id="noise-grid"></div>
+        <div id="audio-container" style="display:none;"></div>
+    </section>
+
     <div style="display: flex; flex-wrap: wrap; gap: 30px;">
         <section class="fade-in" style="flex: 1; min-width: 300px;">
             <h2 class="section-title">关怀清单</h2>
@@ -257,15 +296,18 @@
 </div>
 
 <script>
-    /* 工具与数据库 */
+    /* ================= 工具与数据库 (更换了存储前缀 hb_v2_ ) ================= */
     const toast = msg => { const box = document.getElementById('toast-box'), el = document.createElement('div'); el.className = 'toast'; el.innerText = msg; box.appendChild(el); setTimeout(() => el.remove(), 2900); };
     let confirmCallback = null;
     const showConfirm = (title, desc, cb) => { document.getElementById('confirm-title').innerText = title; document.getElementById('confirm-desc').innerText = desc; document.getElementById('confirm-modal').classList.add('active'); confirmCallback = cb; };
     const closeModal = id => document.getElementById(id).classList.remove('active');
     document.getElementById('confirm-btn').addEventListener('click', () => { if(confirmCallback) confirmCallback(); closeModal('confirm-modal'); });
+    
     const observer = new IntersectionObserver(entries => { entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('visible'); }); }, {threshold: 0.1});
     document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
-    const db = { get: (k, d) => JSON.parse(localStorage.getItem(`harbor_${k}`)) || d, set: (k, v) => localStorage.setItem(`harbor_${k}`, JSON.stringify(v)) };
+    
+    // 【核心修复】：将键名彻底改为 hb_v2_ 强制绕过旧数据冲突
+    const db = { get: (k, d) => JSON.parse(localStorage.getItem(`hb_v2_${k}`)) || d, set: (k, v) => localStorage.setItem(`hb_v2_${k}`, JSON.stringify(v)) };
 
     /* 主题 */
     const themes = ['light', 'dark', 'sunset', 'forest', 'deepsea'];
@@ -288,7 +330,7 @@
             if(prevIcon) { prevIcon.innerText = '▶'; prevIcon.closest('.music-item').classList.remove('playing'); }
         }
         repoAudio.src = `${id}.mp3`;
-        repoAudio.play().catch(e => toast(`未找到文件，请上传 ${id}.mp3`));
+        repoAudio.play().catch(e => toast(`未找到文件，请在 GitHub 根目录上传 ${id}.mp3`));
         currentRepoSong = id;
         document.getElementById(`icon-${id}`).innerText = '⏸'; item.classList.add('playing');
     }
@@ -300,31 +342,17 @@
         }
     }
 
-    /* 心情打卡 (包含自愈修复机制) */
+    /* 心情打卡 */
     const moodDefs = [ {s: 1, i: '🌧️', l: '低落'}, {s: 2, i: '☁️', l: '疲惫'}, {s: 3, i: '⛅', l: '平静'}, {s: 4, i: '☀️', l: '开心'}, {s: 5, i: '🌈', l: '雀跃'} ];
     let selectedMood = null;
     const renderMoodBtns = () => { document.getElementById('mood-buttons').innerHTML = moodDefs.map(m => `<div class="mood-item" data-label="${m.l}" onclick="selectMood(${m.s}, this)">${m.i}</div>`).join(''); };
     const selectMood = (s, el) => { document.querySelectorAll('.mood-item').forEach(e => e.classList.remove('active')); el.classList.add('active'); selectedMood = s; document.getElementById('mood-extra').style.display = 'block'; };
     const saveMood = () => { if(!selectedMood) return; let moods = db.get('moods', {}); moods[new Date().toLocaleDateString()] = { score: selectedMood, note: document.getElementById('mood-note').value }; db.set('moods', moods); toast('记录成功'); document.getElementById('mood-extra').style.display = 'none'; renderChart(); };
     const renderChart = () => {
-        try {
-            const moods = db.get('moods', {}), dates = Object.keys(moods).slice(-7), wrap = document.getElementById('mood-chart');
-            if(!dates.length) { wrap.innerHTML = '<p style="color:#aaa; font-size:0.8rem; width:100%; text-align:center;">点亮今天的心情吧</p>'; return; }
-            wrap.innerHTML = dates.map(d => {
-                let m = moods[d];
-                // 兼容修复老版本只有数字的数据结构
-                if (typeof m === 'number') { m = { score: m, note: '' }; }
-                if (!m || !m.score) return '';
-                let def = moodDefs.find(x => x.s === m.score);
-                if (!def) return '';
-                return `<div class="chart-bar-wrap"><div style="font-size:0.8rem; margin-bottom:5px;">${def.i}</div><div class="chart-bar" style="height:0" data-h="${(m.score/5)*100}px"></div><div class="chart-label">${d.split('/').slice(1).join('/')}</div></div>`;
-            }).join('');
-            setTimeout(() => document.querySelectorAll('.chart-bar').forEach(b => b.style.height = b.getAttribute('data-h')), 100);
-        } catch (e) {
-            console.error(e);
-            localStorage.removeItem('harbor_moods'); // 清理损坏数据
-            document.getElementById('mood-chart').innerHTML = '<p style="color:#aaa; font-size:0.8rem; width:100%; text-align:center;">底层数据升级，请重新记录</p>';
-        }
+        const moods = db.get('moods', {}), dates = Object.keys(moods).slice(-7), wrap = document.getElementById('mood-chart');
+        if(!dates.length) { wrap.innerHTML = '<p style="color:#aaa; font-size:0.8rem; width:100%; text-align:center;">点亮今天的心情吧</p>'; return; }
+        wrap.innerHTML = dates.map(d => `<div class="chart-bar-wrap"><div style="font-size:0.8rem; margin-bottom:5px;">${moodDefs.find(x=>x.s===moods[d].score).i}</div><div class="chart-bar" style="height:0" data-h="${(moods[d].score/5)*100}px"></div><div class="chart-label">${d.split('/').slice(1).join('/')}</div></div>`).join('');
+        setTimeout(() => document.querySelectorAll('.chart-bar').forEach(b => b.style.height = b.getAttribute('data-h')), 100);
     };
 
     /* 治愈心语 */
@@ -345,27 +373,69 @@
     const toggleBreathing = () => { const btn = document.getElementById('breath-btn'), circle = document.getElementById('breath-circle'), text = document.getElementById('breath-text'); if(!bRun) { bRun = true; btn.innerText = "停止"; btn.style.background = "#ff7875"; runBreath(circle, text, 0); } else { bRun = false; btn.innerText = "开始呼吸"; btn.style.background = "var(--accent)"; clearTimeout(bTimer); circle.style.transform = "scale(1)"; text.innerText = "准备好了吗？"; } };
     const runBreath = (c, t, s) => { if(!bRun) return; const p = bModes[bMode][s]; t.innerText = p.t; c.style.transition = `transform ${p.d}ms linear`; c.style.transform = p.c; bTimer = setTimeout(() => runBreath(c, t, (s + 1) % bModes[bMode].length), p.d); };
 
+    /* 自然白噪音 */
+    const noiseDB = [
+        {id:'rain', i:'🌧️', n:'雨声'}, {id:'forest', i:'🌲', n:'森林鸟鸣'},
+        {id:'stream', i:'🌊', n:'溪流'}, {id:'piano', i:'🎹', n:'轻柔钢琴'},
+        {id:'fire', i:'🔥', n:'篝火'}
+    ];
+    const initNoise = () => { 
+        const grid = document.getElementById('noise-grid'), ac = document.getElementById('audio-container'); 
+        noiseDB.forEach(n => { 
+            grid.innerHTML += `<div class="noise-card" id="card-${n.id}" onclick="toggleNoise('${n.id}')">
+                <span class="noise-icon">${n.i}</span><div style="font-size:0.8rem;">${n.n}</div>
+                <input type="range" class="noise-vol" min="0" max="1" step="0.1" value="0.5" onclick="event.stopPropagation()" oninput="changeVol('${n.id}', this.value)">
+                </div>`; 
+            ac.innerHTML += `<audio id="audio-${n.id}" loop src="${n.id}.mp3"></audio>`; 
+        }); 
+    };
+    const toggleNoise = id => { 
+        const a = document.getElementById(`audio-${id}`), c = document.getElementById(`card-${id}`), fx = document.getElementById(`fx-${id}`);
+        if(c.classList.contains('playing')) { 
+            a.pause(); c.classList.remove('playing'); fx.classList.remove('active');
+        } else { 
+            a.volume = c.querySelector('.noise-vol').value;
+            a.play().catch(()=>toast(`需在仓库放 ${id}.mp3`)); 
+            c.classList.add('playing'); fx.classList.add('active');
+        } 
+    };
+    const changeVol = (id, val) => { document.getElementById(`audio-${id}`).volume = val; };
+    const stopAllNoise = () => { 
+        noiseDB.forEach(n => { 
+            document.getElementById(`audio-${n.id}`).pause(); 
+            document.getElementById(`card-${n.id}`).classList.remove('playing'); 
+            document.getElementById(`fx-${n.id}`).classList.remove('active');
+        }); 
+    };
+
     /* 关怀与日记 */
     const renderCareList = () => { document.getElementById('care-list').innerHTML = db.get('care', [{id:1, t:"喝杯温水", d:false}]).map(i => `<div class="list-item" style="${i.d?'opacity:0.5; text-decoration:line-through;':''}"><label style="display:flex; align-items:center; gap:10px;"><input type="checkbox" ${i.d?'checked':''} onchange="toggleCare(${i.id})"> ${i.t}</label><span style="color:#ff7875;cursor:pointer;" onclick="delCare(${i.id})">✖</span></div>`).join(''); };
     const addCare = () => { const v = document.getElementById('new-care').value.trim(); if(!v) return; let l = db.get('care', []); l.push({id: Date.now(), t: v, d: false}); db.set('care', l); document.getElementById('new-care').value = ''; renderCareList(); };
     const toggleCare = id => { let l = db.get('care', []); const i = l.find(x => x.id === id); if(i) i.d = !i.d; db.set('care', l); renderCareList(); };
     const delCare = id => { db.set('care', db.get('care', []).filter(i => i.id !== id)); renderCareList(); };
 
-    const renderDiary = () => { document.getElementById('diary-list').innerHTML = db.get('diary', []).map(d => `<div class="list-item" style="flex-direction:column; gap:5px;"><div class="flex-between" style="width:100%;"><span class="tag">${d.tag || '日常'}</span><span style="font-size:0.8rem; color:#888;">${d.time}</span></div><div>${d.content}</div><div style="text-align:right;width:100%;"><span style="color:#ff7875;cursor:pointer;font-size:0.8rem;" onclick="delDiary(${d.id})">删除</span></div></div>`).join(''); };
+    const renderDiary = () => { document.getElementById('diary-list').innerHTML = db.get('diary', []).map(d => `<div class="list-item" style="flex-direction:column; gap:5px;"><div class="flex-between" style="width:100%;"><span class="tag">${d.tag}</span><span style="font-size:0.8rem; color:#888;">${d.time}</span></div><div>${d.content}</div><div style="text-align:right;width:100%;"><span style="color:#ff7875;cursor:pointer;font-size:0.8rem;" onclick="delDiary(${d.id})">删除</span></div></div>`).join(''); };
     const saveDiary = () => { const c = document.getElementById('diary-content').value.trim(); if(!c) return; let d = db.get('diary', []); d.unshift({ id: Date.now(), tag: document.getElementById('diary-tag').value, time: new Date().toLocaleDateString(), content: c }); db.set('diary', d); document.getElementById('diary-content').value=''; renderDiary(); toast("已记录"); };
     const delDiary = id => { showConfirm('删除日记', '确定要抹去这段记忆吗？', () => { db.set('diary', db.get('diary', []).filter(d => d.id !== id)); renderDiary(); }); };
 
     /* 相册 */
     const renderPhotos = () => { document.getElementById('photo-grid').innerHTML = db.get('photos', []).map(p => `<div class="photo-card" onclick="openPhoto('${p.data}')"><img src="${p.data}" loading="lazy"><div class="photo-mask"><button class="btn btn-solid" style="padding:4px 10px; font-size:0.7rem;" onclick="event.stopPropagation(); delPhoto(${p.id})">删除</button></div></div>`).join(''); };
-    const uploadPhoto = e => { const f = e.target.files[0]; if(!f) return; if(f.size > 2*1024*1024) return toast("图片需小于2MB"); const r = new FileReader(); r.onload = ev => { let p = db.get('photos', []); p.unshift({ id: Date.now(), data: ev.target.result }); try { db.set('photos', p); renderPhotos(); } catch(err) { toast('存储满'); } }; r.readAsDataURL(f); };
+    const uploadPhoto = e => { const f = e.target.files[0]; if(!f) return; if(f.size > 2*1024*1024) return toast("图片需小于2MB"); const r = new FileReader(); r.onload = ev => { let p = db.get('photos', []); p.unshift({ id: Date.now(), data: ev.target.result }); try { db.set('photos', p); renderPhotos(); } catch(err) { toast('存储空间不足'); } }; r.readAsDataURL(f); };
     const delPhoto = id => { showConfirm('删除照片', '确定删除？', () => { db.set('photos', db.get('photos', []).filter(p => p.id !== id)); renderPhotos(); }); };
     const openPhoto = src => { document.getElementById('preview-img').src = src; document.getElementById('photo-modal').classList.add('active'); };
 
     /* 备份恢复 */
     const exportData = () => { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(localStorage)], {type:'application/json'})); a.download = '备份.json'; a.click(); toast("已备份"); };
-    const importData = e => { const f = e.target.files[0]; if(!f) return; const r = new FileReader(); r.onload = ev => { try { const d = JSON.parse(ev.target.result); Object.keys(d).forEach(k => { if(k.startsWith('harbor_')) localStorage.setItem(k, d[k]); }); toast("恢复成功，即将刷新"); setTimeout(()=>location.reload(), 1500); } catch(err){toast("格式错误");} }; r.readAsText(f); };
+    const importData = e => { const f = e.target.files[0]; if(!f) return; const r = new FileReader(); r.onload = ev => { try { const d = JSON.parse(ev.target.result); Object.keys(d).forEach(k => { if(k.startsWith('hb_v2_')) localStorage.setItem(k, d[k]); }); toast("恢复成功，即将刷新"); setTimeout(()=>location.reload(), 1500); } catch(err){toast("格式错误");} }; r.readAsText(f); };
 
-    document.addEventListener('DOMContentLoaded', () => { renderMoodBtns(); renderChart(); renderQuote(); renderCareList(); renderDiary(); renderPhotos(); });
+    /* DOM加载后初始化 */
+    document.addEventListener('DOMContentLoaded', () => { 
+        try {
+            renderMoodBtns(); renderChart(); renderQuote(); initNoise(); renderCareList(); renderDiary(); renderPhotos();
+        } catch (err) {
+            console.error(err);
+        }
+    });
 </script>
 </body>
 </html>
